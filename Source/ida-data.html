@@ -42,15 +42,28 @@
     }
   </style>
 
+  <script>
+    // Run before body renders so standalone mode takes effect immediately
+    var _standalone = new URLSearchParams(window.location.search).get('standalone') === '1';
+    if (_standalone) {
+      document.write('<style>#edmap{top:0!important;height:100%!important;}</style>');
+    }
+  </script>
+
   <title>CanonnED3D - Operation Ida</title>
 
 </head>
 
 <body bgcolor="#000000">
   <script src="https://www.w3schools.com/lib/w3data.js"></script>
-  <div w3-include-html="include/nav.html"></div>
+  <div id="nav-container" w3-include-html="include/nav.html"></div>
 
   <script>
+    if (_standalone) {
+      // Skip loading the nav entirely in standalone/iframe mode
+      document.getElementById('nav-container').removeAttribute('w3-include-html');
+      document.getElementById('nav-container').style.display = 'none';
+    }
     w3IncludeHTML();
   </script>
 
