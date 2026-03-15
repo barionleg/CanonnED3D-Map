@@ -416,6 +416,17 @@ var HUD = {
         }
       }
 
+
+      // Accepts Spansh and Canonn route files (job/parameters/result, state/status optional)
+      function isGenericRouteFile(data) {
+        return data &&
+          typeof data.job === 'string' &&
+          data.parameters !== undefined &&
+          data.result !== undefined &&
+          Array.isArray(data.result);
+      }
+
+      // Legacy: Spansh neutron-router route
       function isSpanshRoute(data) {
         return data &&
           typeof data.job       === 'string' &&
@@ -503,16 +514,13 @@ var HUD = {
             done();
             return;
           }
-
           // Determine from/to — may be in result or parameters depending on format
           var fromSys = (data.result && data.result.source_system) ||
                         (data.parameters && data.parameters.source_system) || '';
           var toSys   = (data.result && data.result.destination_system) ||
                         (data.parameters && data.parameters.destination_system) || '';
-
           // Format A: result.system_jumps — each jump has a 'system' field
           var jumps = data.result && data.result.system_jumps;
-
           // Format B: result.jumps — each jump has a 'name' field; normalise to format A
           if (!jumps || jumps.length === 0) {
             var rawJumps = data.result && data.result.jumps;
@@ -522,17 +530,41 @@ var HUD = {
               });
             }
           }
-
+            // Format C: result is an array of waypoints (Canonn/Spansh export)
+            if ((!jumps || jumps.length === 0) && Array.isArray(data.result)) {
+              jumps = data.result.map(function (wp) {
+                var sys = wp.system || wp.name || '';
+                return { system: sys, x: wp.x, y: wp.y, z: wp.z };
+              }).filter(function (j) { return j.system && j.x !== undefined && j.y !== undefined && j.z !== undefined; });
+            }
           if (!jumps || jumps.length === 0) {
             addMessage(filename + ': Spansh route has no system jumps.', 'error');
             done();
             return;
           }
           displaySpanshRoute(filename, fromSys, toSys, jumps, done);
-        } else {
-          addMessage(filename + ': Unrecognised file format. Expected a Spansh neutron-router route JSON.', 'error');
-          done();
+          return;
         }
+        // New: Generic route file (Canonn/Spansh route export)
+        if (isGenericRouteFile(data)) {
+          // Try to extract system list from result array
+          var jumps = data.result.map(function (wp) {
+            // Accept both {name, x, y, z} and {system, x, y, z}
+            var sys = wp.system || wp.name || '';
+            return { system: sys, x: wp.x, y: wp.y, z: wp.z };
+          }).filter(function (j) { return j.system && j.x !== undefined && j.y !== undefined && j.z !== undefined; });
+          var fromSys = jumps.length > 0 ? jumps[0].system : '';
+          var toSys   = jumps.length > 0 ? jumps[jumps.length-1].system : '';
+          if (jumps.length === 0) {
+            addMessage(filename + ': Route file has no valid systems.', 'error');
+            done();
+            return;
+          }
+          displaySpanshRoute(filename, fromSys, toSys, jumps, done);
+          return;
+        }
+        addMessage(filename + ': Unrecognised file format. Expected a route or system list JSON.', 'error');
+        done();
       }
 
       // Overridden below to also handle raw JSONL text

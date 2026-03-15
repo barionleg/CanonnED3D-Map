@@ -16,6 +16,9 @@ Source/ts
 Source/us/
 Source/us2/
 
+# Ignore samples directory
+Source/samples/
+
 *.sln
 
 Web.config
