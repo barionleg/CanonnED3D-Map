@@ -39,7 +39,7 @@ var canonnEd3d_gec = {
                 name: pinName,
                 cat: [typeToId[type]],
                 infos: '<img src="' + (row.mainImage || '') + '" alt="' + (row.name || '') + '">' +
-                    row.summary + '<br><hr><br>' +
+                    row.summary + '<br><a href="' + row.poiUrl + '" target="_blank" rel="noopener">View on edastro.com</a><br>' + '<br><hr><br>' +
                     '<i>' + (row.descriptionHtml || '') + '</i>',
                 desc: row.descriptionHtml || row.description || '',
                 coords: {
