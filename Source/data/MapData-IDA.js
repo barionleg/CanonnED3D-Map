@@ -31,49 +31,31 @@ var canonnEd3d_ida = {
 	},
 
 	init: function () {
-		Promise.all([
-			fetch(IDA_REPAIRS_URL).then(function (response) { return response.json(); }),
-			fetch(IDA_COLONISATION_URL).then(function (response) { return response.json(); }),
-			fetch('https://downloads.spansh.co.uk/factions.json.gz')
-		])
-			.then(async function (results) {
-				var repairs = results[0];
-				var colonisations = results[1];
-				// Decompress and parse the Spansh factions dump
-				let factionsData;
-				try {
-					const response = results[2];
-					const ds = new DecompressionStream('gzip');
-					const decompressed = response.body.pipeThrough(ds);
-					const reader = decompressed.getReader();
-					let chunks = [];
-					while (true) {
-						const { done, value } = await reader.read();
-						if (done) break;
-						chunks.push(value);
-					}
-					const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-					const combined = new Uint8Array(totalLength);
-					let offset = 0;
-					for (const chunk of chunks) {
-						combined.set(chunk, offset);
-						offset += chunk.length;
-					}
-					factionsData = JSON.parse(new TextDecoder().decode(combined));
-				} catch (e) {
-					console.error('Failed to load or parse Spansh factions.json.gz:', e);
-					factionsData = [];
-				}
+		// Render the map immediately with empty data
+		Ed3d.init({
+			container: 'edmap',
+			json: canonnEd3d_ida.systemsData,
+			withFullscreenToggle: false,
+			withHudPanel: true,
+			hudMultipleSelect: true,
+			effectScaleSystem: [100, 10],
+			startAnim: false,
+			showGalaxyInfos: true,
+			cameraPos: [0, 600, -1200],
+			systemColor: '#FF9D00',
+		});
+		document.getElementById('loading').style.display = 'none';
 
-				// Group repairs by station+system so multiple repairs to the same station
-				// are combined into a single map point.
+		// Repairs
+		fetch(IDA_REPAIRS_URL)
+			.then(response => response.json())
+			.then(repairs => {
 				var repairGroups = {};
 				for (var i = 0; i < repairs.length; i++) {
 					var entry = repairs[i];
 					var station = entry['Station'];
 					var system = entry['System'];
 					var key = station + '||' + system;
-
 					if (!repairGroups[key]) {
 						repairGroups[key] = {
 							station: station,
@@ -85,19 +67,17 @@ var canonnEd3d_ida = {
 							entries: []
 						};
 					}
-
 					repairGroups[key].entries.push({
 						tonsNeeded: entry['Overall Tons Needed'],
 						completed: entry['Completed (YYYY-MM-DD)'],
 						comments: entry['Comments']
 					});
 				}
-
 				var repairKeys = Object.keys(repairGroups);
+				var batch = [];
 				for (var k = 0; k < repairKeys.length; k++) {
 					var group = repairGroups[repairKeys[k]];
 					var displayName = group.station + ' (' + group.system + ')';
-
 					var entryParts = [];
 					for (var e = 0; e < group.entries.length; e++) {
 						var rep = group.entries[e];
@@ -108,13 +88,11 @@ var canonnEd3d_ida = {
 						}
 						entryParts.push(part);
 					}
-
 					var infos = '<b>' + group.station + '</b><br>'
 						+ 'System: ' + group.system + '<br>'
 						+ 'Area: ' + (group.area || 'Unknown') + '<br><hr>'
 						+ entryParts.join('<br><hr>');
-
-					canonnEd3d_ida.systemsData.systems.push({
+					batch.push({
 						name: displayName,
 						cat: [301],
 						coords: {
@@ -125,7 +103,17 @@ var canonnEd3d_ida = {
 						infos: infos,
 					});
 				}
+				Ed3d.addBatch({systems: batch});
+				if (typeof HUD !== 'undefined' && HUD.initFilters) {
+					HUD.initFilters(canonnEd3d_ida.systemsData.categories);
+				}
+			});
 
+		// Colonisation
+		fetch(IDA_COLONISATION_URL)
+			.then(response => response.json())
+			.then(colonisations => {
+				var batch = [];
 				for (var j = 0; j < colonisations.length; j++) {
 					var col = colonisations[j];
 					var colSystem = col['System'];
@@ -133,14 +121,12 @@ var canonnEd3d_ida = {
 					var layoutType = col['Layout Type'];
 					var startDate = col['Start Date'];
 					var endDate = col['End Date'];
-
 					var colInfos = '<b>' + colSystem + '</b><br>'
 						+ 'Station Type: ' + (stationType || 'Unknown') + '<br>'
 						+ 'Layout Type: ' + (layoutType || 'Unknown') + '<br>'
 						+ 'Start Date: ' + (startDate || 'N/A') + '<br>'
 						+ 'End Date: ' + (endDate || 'N/A');
-
-					canonnEd3d_ida.systemsData.systems.push({
+					batch.push({
 						name: colSystem,
 						cat: [302],
 						coords: {
@@ -151,14 +137,45 @@ var canonnEd3d_ida = {
 						infos: colInfos,
 					});
 				}
+				Ed3d.addBatch({systems: batch});
+				if (typeof HUD !== 'undefined' && HUD.initFilters) {
+					HUD.initFilters(canonnEd3d_ida.systemsData.categories);
+				}
+			});
 
-				// Add Operation Ida faction systems from Spansh dump
+		// Faction systems
+		fetch('https://downloads.spansh.co.uk/factions.json.gz')
+			.then(response => {
+				const ds = new DecompressionStream('gzip');
+				const decompressed = response.body.pipeThrough(ds);
+				const reader = decompressed.getReader();
+				let chunks = [];
+				function pump() {
+					return reader.read().then(({done, value}) => {
+						if (done) return;
+						chunks.push(value);
+						return pump();
+					});
+				}
+				return pump().then(() => {
+					const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+					const combined = new Uint8Array(totalLength);
+					let offset = 0;
+					for (const chunk of chunks) {
+						combined.set(chunk, offset);
+						offset += chunk.length;
+					}
+					return JSON.parse(new TextDecoder().decode(combined));
+				});
+			})
+			.then(factionsData => {
 				if (Array.isArray(factionsData)) {
 					const idaFaction = factionsData.find(f => f.name && f.name.toLowerCase() === 'operation ida');
 					if (idaFaction && Array.isArray(idaFaction.systems)) {
+						var batch = [];
 						idaFaction.systems.forEach(function (sys) {
 							const isControlled = sys.isControllingFaction === true;
-							canonnEd3d_ida.systemsData.systems.push({
+							batch.push({
 								name: sys.systemName,
 								cat: [isControlled ? 401 : 402],
 								coords: {
@@ -169,23 +186,12 @@ var canonnEd3d_ida = {
 								infos: '<b>Operation Ida Faction</b><br>' + (isControlled ? 'Controlled' : 'Present'),
 							});
 						});
+						Ed3d.addBatch({systems: batch});
+						if (typeof HUD !== 'undefined' && HUD.initFilters) {
+							HUD.initFilters(canonnEd3d_ida.systemsData.categories);
+						}
 					}
 				}
-
-				Ed3d.init({
-					container: 'edmap',
-					json: canonnEd3d_ida.systemsData,
-					withFullscreenToggle: false,
-					withHudPanel: true,
-					hudMultipleSelect: true,
-					effectScaleSystem: [100, 10],
-					startAnim: false,
-					showGalaxyInfos: true,
-					cameraPos: [0, 600, -1200], // zoomed out further
-					systemColor: '#FF9D00',
-				});
-
-				document.getElementById('loading').style.display = 'none';
 			})
 			.catch(function (err) {
 				console.error('Failed to load Operation Ida data:', err);
