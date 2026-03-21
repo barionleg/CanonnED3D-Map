@@ -14,6 +14,16 @@ var canonnEd3d_ida = {
 					name: 'Colonisation',
 					color: '00CED1',
 				}
+			},
+			'Operation Ida Faction': {
+				'401': {
+					name: 'Controlled',
+					color: '4AA02C', // green
+				},
+				'402': {
+					name: 'Present',
+					color: 'A8EB6A', // light green
+				}
 			}
 		},
 		systems: [],
@@ -23,11 +33,37 @@ var canonnEd3d_ida = {
 	init: function () {
 		Promise.all([
 			fetch(IDA_REPAIRS_URL).then(function (response) { return response.json(); }),
-			fetch(IDA_COLONISATION_URL).then(function (response) { return response.json(); })
+			fetch(IDA_COLONISATION_URL).then(function (response) { return response.json(); }),
+			fetch('https://downloads.spansh.co.uk/factions.json.gz')
 		])
-			.then(function (results) {
+			.then(async function (results) {
 				var repairs = results[0];
 				var colonisations = results[1];
+				// Decompress and parse the Spansh factions dump
+				let factionsData;
+				try {
+					const response = results[2];
+					const ds = new DecompressionStream('gzip');
+					const decompressed = response.body.pipeThrough(ds);
+					const reader = decompressed.getReader();
+					let chunks = [];
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
+						chunks.push(value);
+					}
+					const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
+					const combined = new Uint8Array(totalLength);
+					let offset = 0;
+					for (const chunk of chunks) {
+						combined.set(chunk, offset);
+						offset += chunk.length;
+					}
+					factionsData = JSON.parse(new TextDecoder().decode(combined));
+				} catch (e) {
+					console.error('Failed to load or parse Spansh factions.json.gz:', e);
+					factionsData = [];
+				}
 
 				// Group repairs by station+system so multiple repairs to the same station
 				// are combined into a single map point.
@@ -116,16 +152,36 @@ var canonnEd3d_ida = {
 					});
 				}
 
+				// Add Operation Ida faction systems from Spansh dump
+				if (Array.isArray(factionsData)) {
+					const idaFaction = factionsData.find(f => f.name && f.name.toLowerCase() === 'operation ida');
+					if (idaFaction && Array.isArray(idaFaction.systems)) {
+						idaFaction.systems.forEach(function (sys) {
+							const isControlled = sys.isControllingFaction === true;
+							canonnEd3d_ida.systemsData.systems.push({
+								name: sys.systemName,
+								cat: [isControlled ? 401 : 402],
+								coords: {
+									x: sys.coords.x,
+									y: sys.coords.y,
+									z: sys.coords.z
+								},
+								infos: '<b>Operation Ida Faction</b><br>' + (isControlled ? 'Controlled' : 'Present'),
+							});
+						});
+					}
+				}
+
 				Ed3d.init({
 					container: 'edmap',
 					json: canonnEd3d_ida.systemsData,
 					withFullscreenToggle: false,
 					withHudPanel: true,
 					hudMultipleSelect: true,
-					effectScaleSystem: [20, 500],
+					effectScaleSystem: [100, 10],
 					startAnim: false,
 					showGalaxyInfos: true,
-					cameraPos: [0, 250, -500],
+					cameraPos: [0, 600, -1200], // zoomed out further
 					systemColor: '#FF9D00',
 				});
 
