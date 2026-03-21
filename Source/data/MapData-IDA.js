@@ -178,11 +178,28 @@ var canonnEd3d_ida = {
 					withFullscreenToggle: false,
 					withHudPanel: true,
 					hudMultipleSelect: true,
-					effectScaleSystem: [100, 10],
+					effectScaleSystem: [20, 500],
 					startAnim: false,
 					showGalaxyInfos: true,
-					cameraPos: [0, 600, -1200], // zoomed out further
+					cameraPos: [25, 14100, -12900],
 					systemColor: '#FF9D00',
+					finished: function () {
+						// Ensure we start from a high-level (far) view, then animate in to Sol
+						try {
+							if (typeof camera !== 'undefined' && camera.position) {
+								camera.position.set(25, 14100, -12900);
+							}
+							if (typeof controls !== 'undefined' && controls.target) {
+								controls.target.set(0, 0, 0);
+							}
+						} catch (e) { /* ignore if globals not available yet */ }
+
+						Ed3d.playerPos = [0, 0, 0];
+						Ed3d.cameraPos = [0, 1000, -1500];
+						if (Ed3d.Action && typeof Ed3d.Action.moveInitalPosition === 'function') {
+							Ed3d.Action.moveInitalPosition(1500);
+						}
+					},
 				});
 
 				document.getElementById('loading').style.display = 'none';
