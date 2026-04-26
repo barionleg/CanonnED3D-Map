@@ -1,3 +1,28 @@
+//-- Nav-to-edmap position adjustment
+(function () {
+  function adjustMapToNav() {
+    var nav = document.getElementById('cssmenu');
+    var edmap = document.getElementById('edmap');
+    if (!nav || !edmap) return;
+    var navH = nav.getBoundingClientRect().height;
+    edmap.style.top = navH + 'px';
+    edmap.style.height = 'calc(100vh - ' + navH + 'px)';
+  }
+
+  // Re-run whenever the nav is mutated (w3IncludeHTML injects it asynchronously)
+  var observer = new MutationObserver(function () {
+    adjustMapToNav();
+  });
+  observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+
+  window.addEventListener('load', function () {
+    adjustMapToNav();
+    // Stop watching after load — resize listener takes over
+    observer.disconnect();
+  });
+  window.addEventListener('resize', adjustMapToNav);
+})();
+
 //--
 var camera;
 var controls;
@@ -17,153 +42,153 @@ var lensFlareSel;
 
 var Ed3d = {
 
-  'container'           : null,
-  'basePath'            : './',
+  'container': null,
+  'basePath': './',
 
-  'jsonPath'            : null,
-  'jsonContainer'       : null,
-  'json'                : null,
+  'jsonPath': null,
+  'jsonContainer': null,
+  'json': null,
 
-  'grid1H'              : null,
-  'grid1K'              : null,
-  'grid1XL'             : null,
+  'grid1H': null,
+  'grid1K': null,
+  'grid1XL': null,
 
-  'tween'               : null,
+  'tween': null,
 
-  'globalView'          : true,
+  'globalView': true,
 
   //-- Fog density save
-  'fogDensity'          : null,
+  'fogDensity': null,
 
   //-- Defined texts
-  'textSel'             : [],
+  'textSel': [],
 
   //-- Object list by categories
-  'catObjs'             : [],
-  'catObjsRoutes'       : [],
+  'catObjs': [],
+  'catObjsRoutes': [],
 
   //-- Materials
-  'material'            : {
-    'Trd' : new THREE.MeshBasicMaterial({
+  'material': {
+    'Trd': new THREE.MeshBasicMaterial({
       color: 0xffffff
     }),
-    'line' : new THREE.LineBasicMaterial({
+    'line': new THREE.LineBasicMaterial({
       color: 0xcccccc
     }),
-    'white' : new THREE.MeshBasicMaterial({
+    'white': new THREE.MeshBasicMaterial({
       color: 0xffffff
     }),
-    'orange' : new THREE.MeshBasicMaterial({
+    'orange': new THREE.MeshBasicMaterial({
       color: 0xFF9D00
     }),
-    'black' : new THREE.MeshBasicMaterial({
+    'black': new THREE.MeshBasicMaterial({
       color: 0x010101
     }),
-    'lightblue' : new THREE.MeshBasicMaterial({
+    'lightblue': new THREE.MeshBasicMaterial({
       color: 0x0E7F88
     }),
-    'darkblue' : new THREE.MeshBasicMaterial({
+    'darkblue': new THREE.MeshBasicMaterial({
       color: 0x16292B
     }),
-    'selected' : new THREE.MeshPhongMaterial({
+    'selected': new THREE.MeshPhongMaterial({
       color: 0x0DFFFF
     }),
-    'grey' : new THREE.MeshPhongMaterial({
+    'grey': new THREE.MeshPhongMaterial({
       color: 0x7EA0A0
     }),
-    'transparent' : new THREE.MeshBasicMaterial({
+    'transparent': new THREE.MeshBasicMaterial({
       color: 0x000000,
       transparent: true,
       opacity: 0
     }),
-    'glow_1'            : null,
-    'custom'            : []
+    'glow_1': null,
+    'custom': []
   },
 
-  'starSprite' : 'textures/lensflare/star_grey2.png',
+  'starSprite': 'textures/lensflare/star_grey2.png',
 
-  'colors'              : [],
-  'textures'            : {},
+  'colors': [],
+  'textures': {},
 
   //-- Default color for system sprite
-  'systemColor'         : '#eeeeee',
+  'systemColor': '#eeeeee',
 
   //-- HUD
-  'withHudPanel'        : false,
-  'withOptionsPanel'    : true,
-  'hudMultipleSelect'   : true,
+  'withHudPanel': false,
+  'withOptionsPanel': true,
+  'hudMultipleSelect': true,
 
   //-- Systems
-  'systems'             : [],
+  'systems': [],
 
   //-- Starfield
-  'starfield'           : null,
+  'starfield': null,
 
   //-- Start animation
-  'startAnim'           : true,
+  'startAnim': true,
 
   //-- Scale system effect
-  'effectScaleSystem'   : [10,800],
+  'effectScaleSystem': [10, 800],
 
   //-- Graphical Options
-  'optDistObj'          : 1500,
+  'optDistObj': 1500,
 
   //-- Player position
-  'playerPos'           : [0, 0, 0],
+  'playerPos': [0, 0, 0],
 
   //-- Initial camera position
-  'cameraPos'           : null,
+  'cameraPos': null,
 
   //-- Active 2D top view
-  'isTopView'           : false,
+  'isTopView': false,
 
   //-- Show galaxy infos
-  'showGalaxyInfos'     : false,
+  'showGalaxyInfos': false,
 
   //-- Show names near camera
-  'showNameNear'     : false,
+  'showNameNear': false,
 
   //-- Popup mode for click on detal
-  'popupDetail'      : false,
+  'popupDetail': false,
 
   //-- Objects
-  'Action' : null,
-  'Galaxy' : null,
+  'Action': null,
+  'Galaxy': null,
 
   //-- With button to toggle fullscreen
-  'withFullscreenToggle' : false,
+  'withFullscreenToggle': false,
 
   //-- Collapse subcategories (false: don't collapse)
-  'categoryAutoCollapseSize' : false,
+  'categoryAutoCollapseSize': false,
 
   /**
    * Init Ed3d map
    *
    */
 
-  'init' : function(options) {
+  'init': function (options) {
 
     // Merge options with defaults Ed3d
     var options = $.extend(Ed3d, options);
 
     //-- Init 3D map container
-    $('#'+Ed3d.container).append('<div id="ed3dmap"></div>');
+    $('#' + Ed3d.container).append('<div id="ed3dmap"></div>');
 
 
     //-- Load dependencies
     Loader.update('Load core files');
 
-    if(typeof isMinified !== 'undefined') return Ed3d.launchMap();
+    if (typeof isMinified !== 'undefined') return Ed3d.launchMap();
 
     $.when(
-        $.getScript(Ed3d.basePath + "vendor/three-js/OrbitControls.js"),
-        $.getScript(Ed3d.basePath + "vendor/three-js/CSS3DRenderer.js"),
-        $.getScript(Ed3d.basePath + "vendor/three-js/Projector.js"),
-        $.getScript(Ed3d.basePath + "vendor/three-js/FontUtils.js"),
-        $.Deferred(function( deferred ){
-            $( deferred.resolve );
-        })
-    ).done(function(){
+      $.getScript(Ed3d.basePath + "vendor/three-js/OrbitControls.js"),
+      $.getScript(Ed3d.basePath + "vendor/three-js/CSS3DRenderer.js"),
+      $.getScript(Ed3d.basePath + "vendor/three-js/Projector.js"),
+      $.getScript(Ed3d.basePath + "vendor/three-js/FontUtils.js"),
+      $.Deferred(function (deferred) {
+        $(deferred.resolve);
+      })
+    ).done(function () {
       $.when(
         $.getScript(Ed3d.basePath + "vendor/three-js/helvetiker_regular.typeface.js"),
 
@@ -178,14 +203,14 @@ var Ed3d = {
 
         $.getScript(Ed3d.basePath + "vendor/tween-js/Tween.js"),
 
-        $.Deferred(function( deferred ){
-            $( deferred.resolve );
+        $.Deferred(function (deferred) {
+          $(deferred.resolve);
         })
-      ).done(function() {
+      ).done(function () {
         Loader.update('Done !');
         Ed3d.launchMap();
-        if(typeof options.finished === "function") options.finished();
-      }).fail(function(jqXHR, textStatus, errorThrown){
+        if (typeof options.finished === "function") options.finished();
+      }).fail(function (jqXHR, textStatus, errorThrown) {
         console.log(errorThrown)
       });
     })
@@ -195,7 +220,7 @@ var Ed3d = {
    * Init objects
    */
 
-  'initObjects' : function(options) {
+  'initObjects': function (options) {
 
     //-- Init Object
     this.Action = Action;
@@ -207,7 +232,7 @@ var Ed3d = {
    * Rebuild completely system list and filter (for new JSon content)
    */
 
-  'rebuild' : function(options) {
+  'rebuild': function (options) {
 
     Loader.start();
 
@@ -215,8 +240,8 @@ var Ed3d = {
     this.destroy();
 
     // Reload from JSon
-    if(this.jsonPath != null) Ed3d.loadDatasFromFile();
-    else if(this.jsonContainer != null) Ed3d.loadDatasFromContainer();
+    if (this.jsonPath != null) Ed3d.loadDatasFromFile();
+    else if (this.jsonContainer != null) Ed3d.loadDatasFromContainer();
 
     this.Action.moveInitalPosition();
 
@@ -228,7 +253,7 @@ var Ed3d = {
    * Destroy the 3dmap
    */
 
-  'destroy' : function() {
+  'destroy': function () {
 
     Loader.start();
 
@@ -246,7 +271,7 @@ var Ed3d = {
    * Launch
    */
 
-  'launchMap' : function() {
+  'launchMap': function () {
 
     this.initObjects();
 
@@ -258,8 +283,8 @@ var Ed3d = {
 
     // Create grid
 
-    Ed3d.grid1H  = $.extend({}, Grid.init(100, 0x111E23, 0), {});
-    Ed3d.grid1K  = $.extend({}, Grid.init(1000, 0x22323A, 1000), {});
+    Ed3d.grid1H = $.extend({}, Grid.init(100, 0x111E23, 0), {});
+    Ed3d.grid1K = $.extend({}, Grid.init(1000, 0x22323A, 1000), {});
     Ed3d.grid1XL = $.extend({}, Grid.infos(10000, 0x22323A, 10000), {});
 
 
@@ -278,28 +303,23 @@ var Ed3d = {
 
     // Stream system data in after the initial render
     Loader.update('Loading data...');
-    if(this.jsonPath != null)
-    {
-       Ed3d.loadDatasFromFile();
+    if (this.jsonPath != null) {
+      Ed3d.loadDatasFromFile();
     }
-    else if(this.jsonContainer != null)
-    {
-       Ed3d.loadDatasFromContainer();
+    else if (this.jsonContainer != null) {
+      Ed3d.loadDatasFromContainer();
     }
-    else if($('.ed3d-item').length > 0)
-    {
-       Ed3d.loadDatasFromAttributes();
+    else if ($('.ed3d-item').length > 0) {
+      Ed3d.loadDatasFromAttributes();
     }
-    else if(this.json != null)
-    {
-       Ed3d.loadDatasAsync(this.json);
+    else if (this.json != null) {
+      Ed3d.loadDatasAsync(this.json);
     }
-    else
-    {
-       Loader.stop();
+    else {
+      Loader.stop();
     }
 
-    if(!this.startAnim) {
+    if (!this.startAnim) {
       Ed3d.grid1XL.hide();
       this.Galaxy.milkyway2D.visible = false;
     }
@@ -313,7 +333,7 @@ var Ed3d = {
    * Init Three.js scene
    */
 
-  'loadTextures' : function() {
+  'loadTextures': function () {
 
     //-- Load textures for lensflare
     var texloader = new THREE.TextureLoader();
@@ -362,9 +382,9 @@ var Ed3d = {
 
   },
 
-  'addCustomMaterial' : function (id, color) {
+  'addCustomMaterial': function (id, color) {
 
-    var color = new THREE.Color('#'+color);
+    var color = new THREE.Color('#' + color);
     this.colors[id] = color;
 
   },
@@ -374,7 +394,7 @@ var Ed3d = {
    * Init Three.js scene
    */
 
-  'initScene' : function() {
+  'initScene': function () {
 
     container = document.getElementById("ed3dmap");
 
@@ -411,7 +431,7 @@ var Ed3d = {
     controls.zoomSpeed = 2.0;
     controls.panSpeed = 0.8;
     controls.maxDistance = 60000;
-    controls.enableZoom=1;controls.enablePan=1;controls.enableDamping=!0;controls.dampingFactor=.3;
+    controls.enableZoom = 1; controls.enablePan = 1; controls.enableDamping = !0; controls.dampingFactor = .3;
 
 
     // Add Fog
@@ -426,10 +446,10 @@ var Ed3d = {
    * Show the scene when fully loaded
    */
 
-  'showScene' : function() {
+  'showScene': function () {
 
-      Loader.stop();
-      scene.visible = true;
+    Loader.stop();
+    scene.visible = true;
 
   },
 
@@ -437,18 +457,18 @@ var Ed3d = {
    * Load Json file to fill map
    */
 
-  'loadDatasFromFile' : function() {
+  'loadDatasFromFile': function () {
 
-    $.getJSON(this.jsonPath, function(data) {
+    $.getJSON(this.jsonPath, function (data) {
 
       Ed3d.loadDatasAsync(data);
 
     });
   },
 
-  'loadDatasFromContainer' : function() {
+  'loadDatasFromContainer': function () {
 
-    var content = $('#'+this.jsonContainer).html();
+    var content = $('#' + this.jsonContainer).html();
     var json = null;
 
     try {
@@ -457,23 +477,23 @@ var Ed3d = {
       console.log("Can't load JSon for systems");
     }
 
-    if(json != null) Ed3d.loadDatasAsync(json);
+    if (json != null) Ed3d.loadDatasAsync(json);
     else Ed3d.loadDatasComplete();
 
   },
 
 
-  'loadDatasFromAttributes' : function() {
+  'loadDatasFromAttributes': function () {
 
     var json = [];
-    $('.ed3d-item').each(function(e) {
+    $('.ed3d-item').each(function (e) {
       var objName = $(this).html();
       var coords = $(this).data('coords').split(",");
-      if(coords.length == 3)
-        json.push({name:objName,coords:{x:coords[0],y:coords[1],z:coords[2]}});
+      if (coords.length == 3)
+        json.push({ name: objName, coords: { x: coords[0], y: coords[1], z: coords[2] } });
     });
 
-    if(json.length > 0) Ed3d.loadDatasAsync(json);
+    if (json.length > 0) Ed3d.loadDatasAsync(json);
     else Ed3d.loadDatasComplete();
 
   },
@@ -488,47 +508,47 @@ var Ed3d = {
    * @param {number}       batchSize Systems to process per tick (default 500)
    * @param {function}     [done]    Optional callback fired when finished
    */
-  'loadDatasAsync' : function(data, batchSize, done, skipInit) {
+  'loadDatasAsync': function (data, batchSize, done, skipInit) {
 
     var BATCH_SIZE = batchSize || 500;
 
     //-- Initialise particle geometry only on first load, not when appending batches
-    if(!skipInit) {
+    if (!skipInit) {
       System.initParticleSystem();
       //-- Always register Sagittarius A* as a clickable particle so it behaves like any other system
       System.create({ name: 'Sagittarius A*', coords: { x: Galaxy.x, y: Galaxy.y, z: Galaxy.z } });
     }
 
     //-- Build HUD category filters right away so they are visible during streaming
-    if(data.categories != undefined) HUD.initFilters(data.categories);
+    if (data.categories != undefined) HUD.initFilters(data.categories);
 
     //-- Register route waypoints so systems can be matched as they stream in
-    if(data.routes != undefined) {
-      $.each(data.routes, function(key, route) {
+    if (data.routes != undefined) {
+      $.each(data.routes, function (key, route) {
         Route.initRoute(key, route);
       });
     }
 
-    var list  = (data.systems !== undefined) ? data.systems : data;
+    var list = (data.systems !== undefined) ? data.systems : data;
     var total = (list && list.length) ? list.length : 0;
     var offset = 0;
 
-    if(total === 0) {
+    if (total === 0) {
       Ed3d.loadDatasComplete();
-      if(typeof done === 'function') done();
+      if (typeof done === 'function') done();
       return;
     }
 
-    var processBatch = function() {
+    var processBatch = function () {
 
       var end = Math.min(offset + BATCH_SIZE, total);
 
-      for(var i = offset; i < end; i++) {
-        var val    = list[i];
+      for (var i = offset; i < end; i++) {
+        var val = list[i];
         var system = System.create(val);
-        if(system != undefined) {
-          if(val.cat != undefined) Ed3d.addObjToCategories(system, val.cat);
-          if(val.cat != undefined) Ed3d.systems.push(system);
+        if (system != undefined) {
+          if (val.cat != undefined) Ed3d.addObjToCategories(system, val.cat);
+          if (val.cat != undefined) Ed3d.systems.push(system);
         }
       }
 
@@ -539,23 +559,23 @@ var Ed3d = {
 
       Loader.update('Systems... ' + offset + ' / ' + total);
 
-      if(offset < total) {
+      if (offset < total) {
         //-- Yield to the render loop so the browser paints the new particles
         setTimeout(processBatch, 0);
       } else {
 
         //-- All systems done – finalise routes, heatmap and camera
-        if(data.routes != undefined) {
-          $.each(data.routes, function(key, route) {
+        if (data.routes != undefined) {
+          $.each(data.routes, function (key, route) {
             Route.createRoute(key, route);
           });
         }
 
-        if(data.heatmap != undefined) {
+        if (data.heatmap != undefined) {
           Heatmap.create(data.heatmap);
         }
 
-        if(Ed3d.startAnim && data.position != undefined) {
+        if (Ed3d.startAnim && data.position != undefined) {
           Ed3d.playerPos = [data.position.x, data.position.y, data.position.z];
           var camX = (parseInt(data.position.x) - 500);
           var camY = (parseInt(data.position.y) + 8500);
@@ -565,7 +585,7 @@ var Ed3d = {
         }
 
         Ed3d.loadDatasComplete();
-        if(typeof done === 'function') done();
+        if (typeof done === 'function') done();
       }
     };
 
@@ -575,93 +595,93 @@ var Ed3d = {
   },
 
 
-  'loadDatas' : function(data) {
+  'loadDatas': function (data) {
 
-      //-- Init Particle system
-      System.initParticleSystem();
-      //-- Always register Sagittarius A* as a clickable particle so it behaves like any other system
-      System.create({ name: 'Sagittarius A*', coords: { x: Galaxy.x, y: Galaxy.y, z: Galaxy.z } });
+    //-- Init Particle system
+    System.initParticleSystem();
+    //-- Always register Sagittarius A* as a clickable particle so it behaves like any other system
+    System.create({ name: 'Sagittarius A*', coords: { x: Galaxy.x, y: Galaxy.y, z: Galaxy.z } });
 
-      //-- Load cat filters
-      if(data.categories != undefined) HUD.initFilters(data.categories);
+    //-- Load cat filters
+    if (data.categories != undefined) HUD.initFilters(data.categories);
 
-      //-- Check if simple or complex json
-      list = (data.systems !== undefined) ? data.systems : data;
+    //-- Check if simple or complex json
+    list = (data.systems !== undefined) ? data.systems : data;
 
-      //-- Init Routes
+    //-- Init Routes
 
-      Loader.update('Routes...');
-      if(data.routes != undefined) {
-        $.each(data.routes, function(key, route) {
-          Route.initRoute(key, route);
-        });
+    Loader.update('Routes...');
+    if (data.routes != undefined) {
+      $.each(data.routes, function (key, route) {
+        Route.initRoute(key, route);
+      });
+    }
+
+    //-- Loop into systems
+
+    Loader.update('Systems...');
+    $.each(list, function (key, val) {
+
+      system = System.create(val);
+      if (system != undefined) {
+        if (val.cat != undefined) Ed3d.addObjToCategories(system, val.cat);
+        if (val.cat != undefined) Ed3d.systems.push(system);
       }
 
-      //-- Loop into systems
+    });
 
-      Loader.update('Systems...');
-      $.each(list, function(key, val) {
+    //-- Routes
 
-        system = System.create(val);
-        if(system != undefined) {
-          if(val.cat != undefined) Ed3d.addObjToCategories(system,val.cat);
-          if(val.cat != undefined) Ed3d.systems.push(system);
-        }
+    if (data.routes != undefined) {
 
+      $.each(data.routes, function (key, route) {
+        Route.createRoute(key, route);
       });
 
-      //-- Routes
+    }
 
-      if(data.routes != undefined) {
+    //-- Heatmap
 
-        $.each(data.routes, function(key, route) {
-          Route.createRoute(key, route);
-        });
+    if (data.heatmap != undefined) {
+      Heatmap.create(data.heatmap);
+    }
 
-      }
+    //-- Check start position in JSon
 
-      //-- Heatmap
+    if (Ed3d.startAnim && data.position != undefined) {
+      Ed3d.playerPos = [data.position.x, data.position.y, data.position.z];
 
-      if(data.heatmap != undefined) {
-        Heatmap.create(data.heatmap);
-      }
+      var camX = (parseInt(data.position.x) - 500);
+      var camY = (parseInt(data.position.y) + 8500);
+      var camZ = (parseInt(data.position.z) - 8500);
+      Ed3d.cameraPos = [camX, camY, camZ];
 
-      //-- Check start position in JSon
-
-      if(Ed3d.startAnim && data.position != undefined) {
-        Ed3d.playerPos = [data.position.x,data.position.y,data.position.z];
-
-        var camX = (parseInt(data.position.x)-500);
-        var camY = (parseInt(data.position.y)+8500);
-        var camZ = (parseInt(data.position.z)-8500);
-        Ed3d.cameraPos = [camX,camY,camZ];
-
-        Action.moveInitalPosition(4000);
-      }
+      Action.moveInitalPosition(4000);
+    }
 
   },
 
-  'loadDatasComplete' : function() {
+  'loadDatasComplete': function () {
 
-      System.endParticleSystem();
-      HUD.init();
-      this.Action.init();
+    System.endParticleSystem();
+    HUD.init();
+    this.Action.init();
 
-      // Codex overlay: when codex URL params are present on non-codex pages,
-      // load codex-overlay.js once and overlay the matching data.
-      if (!Ed3d._codexOverlayTriggered &&
-          window.location.pathname.indexOf('codex.html') === -1) {
-          var CODEX_PARAMS = ['sub_class', 'hud_category', 'english_name', 'platform'];
-          var hasCodexParams = CODEX_PARAMS.some(function (p) {
-              return !!(new URLSearchParams(window.location.search).get(p));
-          });
-          if (hasCodexParams) {
-              Ed3d._codexOverlayTriggered = true;
-              $.getScript(Ed3d.basePath + 'js/codex-overlay.js', function () {
-                  CanonnCodexOverlay.loadIfNeeded();
-              });
-          }
+    // Codex overlay: when codex URL params are present on non-codex pages,
+    // load codex-overlay.js once and overlay the matching data.
+    if (!Ed3d._codexOverlayTriggered &&
+      window.location.pathname.indexOf('codex.html') === -1) {
+      var CODEX_PARAMS = ['sub_class', 'hud_category', 'english_name', 'platform'];
+      var hasCodexParams = CODEX_PARAMS.some(function (p) {
+        return !!(new URLSearchParams(window.location.search).get(p));
+      });
+      if (hasCodexParams) {
+        Ed3d._codexOverlayTriggered = true;
+        $.getScript(Ed3d.basePath + 'js/codex-overlay.js', function () {
+          CanonnCodexOverlay.loadIfNeeded();
+        });
       }
+    }
 
   },
 
@@ -673,7 +693,7 @@ var Ed3d = {
    *                             routes / heatmap) or a plain systems array.
    * @param {function}     [done] Optional callback fired when the batch is done.
    */
-  'addBatch' : function(data, done) {
+  'addBatch': function (data, done) {
 
     Ed3d.loadDatasAsync(data, 500, done, true);
 
@@ -683,10 +703,10 @@ var Ed3d = {
    * Add an object to a category
    */
 
-  'addObjToCategories' : function(index, catList) {
+  'addObjToCategories': function (index, catList) {
 
-    $.each(catList, function(keyArr, idCat) {
-      if(Ed3d.catObjs[idCat] != undefined)
+    $.each(catList, function (keyArr, idCat) {
+      if (Ed3d.catObjs[idCat] != undefined)
         Ed3d.catObjs[idCat].push(index);
     });
 
@@ -696,7 +716,7 @@ var Ed3d = {
    * Create a skybox of particle stars
    */
 
-  'skyboxStars' : function() {
+  'skyboxStars': function () {
 
     var sizeStars = 10000;
 
@@ -725,13 +745,13 @@ var Ed3d = {
    * Calc distance from Sol
    */
 
-  'calcDistSol' : function(target) {
+  'calcDistSol': function (target) {
 
     var dx = target.x;
     var dy = target.y;
     var dz = target.z;
 
-    return Math.round(Math.sqrt(dx*dx+dy*dy+dz*dz));
+    return Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
   }
 
 
@@ -748,24 +768,24 @@ function animate(time) {
 
   //rendererStats.update(renderer);
 
-  if(scene.visible == false) {
-    requestAnimationFrame( animate );
+  if (scene.visible == false) {
+    requestAnimationFrame(animate);
     return;
   }
 
   refreshWithCamPos();
- //controls.noRotate().set(false);
- //controls.noPan().set(false);
- //controls.minPolarAngle = 0;
- //controls.maxPolarAngle = 0;
+  //controls.noRotate().set(false);
+  //controls.noPan().set(false);
+  //controls.minPolarAngle = 0;
+  //controls.maxPolarAngle = 0;
 
   controls.update();
 
   TWEEN.update(time);
 
   //-- If 2D top view, lock camera pos
-  if(Ed3d.isTopView) {
-    camera.rotation.set(-Math.PI/2,0,0);
+  if (Ed3d.isTopView) {
+    camera.rotation.set(-Math.PI / 2, 0, 0);
     camera.position.x = controls.target.x;
     camera.position.z = controls.target.z;
   }
@@ -781,14 +801,14 @@ function animate(time) {
 
   //-- Move starfield with cam
   Ed3d.starfield.position.set(
-    controls.target.x-(controls.target.x/10)%4000,
-    controls.target.y-(controls.target.y/10)%4000,
-    controls.target.z-(controls.target.z/10)%4000
+    controls.target.x - (controls.target.x / 10) % 4000,
+    controls.target.y - (controls.target.y / 10) % 4000,
+    controls.target.z - (controls.target.z / 10) % 4000
   );
 
   //-- Change selection cursor size depending on camera distance
 
-  var scale = distanceFromTarget(camera)/200;
+  var scale = distanceFromTarget(camera) / 200;
 
   this.Action.updateCursorSize(scale);
 
@@ -802,7 +822,7 @@ function animate(time) {
 
   this.Galaxy.infosUpdateCallback(scale);
 
-  if(scale>25) {
+  if (scale > 25) {
 
     enableFarView(scale);
 
@@ -814,39 +834,39 @@ function animate(time) {
 
   this.Action.updatePointClickRadius(scale);
 
-  requestAnimationFrame( animate );
+  requestAnimationFrame(animate);
 
 
 }
 
 var isFarView = false;
 
-function enableFarView (scale, withAnim) {
+function enableFarView(scale, withAnim) {
 
-  if(isFarView || this.Galaxy == null) return;
-  if(!this.Galaxy.milkyway[0] || !this.Galaxy.milkyway[1]) return;
-  if(withAnim == undefined) withAnim = true;
+  if (isFarView || this.Galaxy == null) return;
+  if (!this.Galaxy.milkyway[0] || !this.Galaxy.milkyway[1]) return;
+  if (withAnim == undefined) withAnim = true;
 
   isFarView = true;
 
   //-- Scale change animation
-  var scaleFrom = {zoom:25};
-  var scaleTo = {zoom:500};
-  if(withAnim) {
+  var scaleFrom = { zoom: 25 };
+  var scaleTo = { zoom: 500 };
+  if (withAnim) {
 
     var obj = this;
 
     //controls.enabled = false;
-    Ed3d.tween = new TWEEN.Tween(scaleFrom, {override:true}).to(scaleTo, 500)
+    Ed3d.tween = new TWEEN.Tween(scaleFrom, { override: true }).to(scaleTo, 500)
       .start()
       .onUpdate(function () {
         obj.Galaxy.milkyway[0].material.size = scaleFrom.zoom;
-        obj.Galaxy.milkyway[1].material.size = scaleFrom.zoom*4;
+        obj.Galaxy.milkyway[1].material.size = scaleFrom.zoom * 4;
       });
 
   } else {
     this.Galaxy.milkyway[0].material.size = scaleTo;
-    this.Galaxy.milkyway[1].material.size = scaleTo*4;
+    this.Galaxy.milkyway[1].material.size = scaleTo * 4;
   }
 
   //-- Enable 2D galaxy
@@ -868,23 +888,23 @@ function enableFarView (scale, withAnim) {
 
 function disableFarView(scale, withAnim) {
 
-  if(!isFarView) return;
-  if(withAnim == undefined) withAnim = true;
+  if (!isFarView) return;
+  if (withAnim == undefined) withAnim = true;
 
   isFarView = false;
-  var oldScale = parseFloat(1/(25/3));
+  var oldScale = parseFloat(1 / (25 / 3));
 
 
   //-- Scale change animation
 
-  var scaleFrom = {zoom:250};
-  var scaleTo = {zoom:64};
-  if(withAnim) {
+  var scaleFrom = { zoom: 250 };
+  var scaleTo = { zoom: 64 };
+  if (withAnim) {
 
     var obj = this;
 
     //controls.enabled = false;
-    Ed3d.tween = new TWEEN.Tween(scaleFrom, {override:true}).to(scaleTo, 500)
+    Ed3d.tween = new TWEEN.Tween(scaleFrom, { override: true }).to(scaleTo, 500)
       .start()
       .onUpdate(function () {
         obj.Galaxy.milkyway[0].material.size = scaleFrom.zoom;
@@ -904,7 +924,7 @@ function disableFarView(scale, withAnim) {
   this.Galaxy.milkyway[0].material.size = 16;
 
   //--
-  camera.scale.set(1,1,1);
+  camera.scale.set(1, 1, 1);
 
   this.Action.updateCursorSize(1);
 
@@ -921,12 +941,12 @@ function render() {
   renderer.render(scene, camera);
 }
 
-function refresh3dMapSize () {
-  if(renderer != undefined) {
+function refresh3dMapSize() {
+  if (renderer != undefined) {
     var width = container.offsetWidth;
     var height = container.offsetHeight;
-    if(width<100) width = 100;
-    if(height<100) height = 100;
+    if (width < 100) width = 100;
+    if (height < 100) height = 100;
     renderer.setSize(width, height);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -949,23 +969,23 @@ window.addEventListener('resize', function () {
 // Test perf
 
 
-function distance (v1, v2) {
-    var dx = v1.position.x - v2.position.x;
-    var dy = v1.position.y - v2.position.y;
-    var dz = v1.position.z - v2.position.z;
+function distance(v1, v2) {
+  var dx = v1.position.x - v2.position.x;
+  var dy = v1.position.y - v2.position.y;
+  var dz = v1.position.z - v2.position.z;
 
-    return Math.round(Math.sqrt(dx*dx+dy*dy+dz*dz));
+  return Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
 }
 
-function distanceFromTarget (v1) {
-    var dx = v1.position.x - controls.target.x;
-    var dy = v1.position.y - controls.target.y;
-    var dz = v1.position.z - controls.target.z;
+function distanceFromTarget(v1) {
+  var dx = v1.position.x - controls.target.x;
+  var dy = v1.position.y - controls.target.y;
+  var dz = v1.position.z - controls.target.z;
 
-    return Math.round(Math.sqrt(dx*dx+dy*dy+dz*dz));
+  return Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz));
 }
 
-var camSave = {'x':0,'y':0,'z':0};
+var camSave = { 'x': 0, 'y': 0, 'z': 0 };
 
 
 function refreshWithCamPos() {
@@ -974,24 +994,24 @@ function refreshWithCamPos() {
   var n = d.getTime();
 
   //-- Refresh only every 5 sec
-  if(n % 1 != 0) return;
+  if (n % 1 != 0) return;
 
   Ed3d.grid1H.addCoords();
   Ed3d.grid1K.addCoords();
 
   //-- Refresh only if the camera moved
-  var p = Ed3d.optDistObj/2;
-  if(
-    camSave.x == Math.round(camera.position.x/p)*p &&
-    camSave.y == Math.round(camera.position.y/p)*p &&
-    camSave.z == Math.round(camera.position.z/p)*p
+  var p = Ed3d.optDistObj / 2;
+  if (
+    camSave.x == Math.round(camera.position.x / p) * p &&
+    camSave.y == Math.round(camera.position.y / p) * p &&
+    camSave.z == Math.round(camera.position.z / p) * p
   ) return;
 
   //-- Save new pos
 
-  camSave.x = Math.round(camera.position.x/p)*p;
-  camSave.y = Math.round(camera.position.y/p)*p;
-  camSave.z = Math.round(camera.position.z/p)*p;
+  camSave.x = Math.round(camera.position.x / p) * p;
+  camSave.y = Math.round(camera.position.y / p) * p;
+  camSave.z = Math.round(camera.position.z / p) * p;
 
 }
 
@@ -1002,16 +1022,16 @@ var Loader = {
    * Start loader
    */
 
-  'start' : function() {
+  'start': function () {
 
     $('#loader').remove();
     $('<div></div>')
-      .attr('id','loader')
+      .attr('id', 'loader')
       .html(Loader.svgAnim)
-      .css('color','rgb(200, 110, 37)')
-      .css('font-size','1.5rem')
-      .css('font-family','Helvetica')
-      .css('font-variant','small-caps')
+      .css('color', 'rgb(200, 110, 37)')
+      .css('font-size', '1.5rem')
+      .css('font-family', 'Helvetica')
+      .css('font-variant', 'small-caps')
       .appendTo('#ed3dmap');
 
 
@@ -1019,7 +1039,7 @@ var Loader = {
     this.animCount = setInterval(function () {
       var animProgress = $('#loader #loadTimer');
       animProgress.append('.');
-      if(animProgress.html() != undefined && animProgress.html().length > 10) animProgress.html('.');
+      if (animProgress.html() != undefined && animProgress.html().length > 10) animProgress.html('.');
     }, 1000);
 
   },
@@ -1028,7 +1048,7 @@ var Loader = {
    * Refresh infos for current loading step
    */
 
-  'update' : function(info) {
+  'update': function (info) {
 
     $('#loader #loadInfos').html(info);
 
@@ -1038,14 +1058,14 @@ var Loader = {
    * Stop loader
    */
 
-  'stop' : function() {
+  'stop': function () {
 
     $('#loader').remove();
     clearInterval(this.animCount);
 
   },
 
-  'animCount' : null,
-  'svgAnim' : '<div id="loadInfos"></div><div id="loadTimer">.</div><svg width="100" height="100" viewbox="0 0 40 40"><path d="m5,8l5,8l5,-8z"   class="l1 d1" /><path d="m5,8l5,-8l5,8z"   class="l1 d2" /><path d="m10,0l5,8l5,-8z"  class="l1 d3" /><path d="m15,8l5,-8l5,8z"  class="l1 d4" /><path d="m20,0l5,8l5,-8z"  class="l1 d5" /><path d="m25,8l5,-8l5,8z"  class="l1 d6" /><path d="m25,8l5,8l5,-8z"  class="l1 d7" /><path d="m30,16l5,-8l5,8z" class="l1 d8" /><path d="m30,16l5,8l5,-8z" class="l1 d9" /><path d="m25,24l5,-8l5,8z" class="l1 d10" /><path d="m25,24l5,8l5,-8z" class="l1 d11" /><path d="m20,32l5,-8l5,8z" class="l1 d13" /><path d="m15,24l5,8l5,-8z" class="l1 d14" /><path d="m10,32l5,-8l5,8z" class="l1 d15" /><path d="m5,24l5,8l5,-8z"  class="l1 d16" /><path d="m5,24l5,-8l5,8z"  class="l1 d17" /><path d="m0,16l5,8l5,-8z"  class="l1 d18" /><path d="m0,16l5,-8l5,8z"  class="l1 d19" /><path d="m10,16l5,-8l5,8z" class="l2 d0" /><path d="m15,8l5,8l5,-8z"  class="l2 d3" /><path d="m20,16l5,-8l5,8z" class="l2 d6"  /><path d="m20,16l5,8l5,-8z" class="l2 d9" /><path d="m15,24l5,-8l5,8z" class="l2 d12" /><path d="m10,16l5,8l5,-8z" class="l2 d15" /></svg>'
+  'animCount': null,
+  'svgAnim': '<div id="loadInfos"></div><div id="loadTimer">.</div><svg width="100" height="100" viewbox="0 0 40 40"><path d="m5,8l5,8l5,-8z"   class="l1 d1" /><path d="m5,8l5,-8l5,8z"   class="l1 d2" /><path d="m10,0l5,8l5,-8z"  class="l1 d3" /><path d="m15,8l5,-8l5,8z"  class="l1 d4" /><path d="m20,0l5,8l5,-8z"  class="l1 d5" /><path d="m25,8l5,-8l5,8z"  class="l1 d6" /><path d="m25,8l5,8l5,-8z"  class="l1 d7" /><path d="m30,16l5,-8l5,8z" class="l1 d8" /><path d="m30,16l5,8l5,-8z" class="l1 d9" /><path d="m25,24l5,-8l5,8z" class="l1 d10" /><path d="m25,24l5,8l5,-8z" class="l1 d11" /><path d="m20,32l5,-8l5,8z" class="l1 d13" /><path d="m15,24l5,8l5,-8z" class="l1 d14" /><path d="m10,32l5,-8l5,8z" class="l1 d15" /><path d="m5,24l5,8l5,-8z"  class="l1 d16" /><path d="m5,24l5,-8l5,8z"  class="l1 d17" /><path d="m0,16l5,8l5,-8z"  class="l1 d18" /><path d="m0,16l5,-8l5,8z"  class="l1 d19" /><path d="m10,16l5,-8l5,8z" class="l2 d0" /><path d="m15,8l5,8l5,-8z"  class="l2 d3" /><path d="m20,16l5,-8l5,8z" class="l2 d6"  /><path d="m20,16l5,8l5,-8z" class="l2 d9" /><path d="m15,24l5,-8l5,8z" class="l2 d12" /><path d="m10,16l5,8l5,-8z" class="l2 d15" /></svg>'
 
 }
