@@ -28,10 +28,12 @@ body {
 #systemDetails {
   transition: transform 0.3s ease;
 }
+
 #hud.hud-collapsed,
 #systemDetails.hud-collapsed {
   transform: translateX(-100%);
 }
+
 #hud,
 #systemDetails {
   font-weight: normal;
@@ -48,7 +50,7 @@ body {
   pointer-events: all;
 
   /*border: solid 3px rgba(255, 140, 13, 0.8);*/
-  background: rgba(3, 3, 6,0.8);
+  background: rgba(3, 3, 6, 0.8);
   border-right: solid 1px #111;
 
   box-sizing: border-box;
@@ -56,7 +58,7 @@ body {
 }
 
 #hud.enlarge {
-  background-color: rgba(10,10,10,0.7);
+  background-color: rgba(10, 10, 10, 0.7);
   width: 90%;
   max-width: 1200px;
 }
@@ -88,7 +90,7 @@ body {
   user-select: none;
   -webkit-user-select: none;
   /* Ensure large enough touch target on mobile */
-  box-shadow: 2px 0 6px rgba(0,0,0,0.5);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.5);
 }
 
 #hud-toggle:hover,
@@ -111,35 +113,40 @@ body {
   left: 10%;
   height: 80%;
   width: 80%;
-  border: solid 5px rgba(60,60,60,0.9);
+  border: solid 5px rgba(60, 60, 60, 0.9);
 }
 
-#hud > div {
+#hud>div {
   margin-bottom: 20px;
   clear: both;
 }
+
 #hud h2 {
   font-weight: bold;
   color: #eee;
   font-size: 0.9rem;
   border-bottom: 1px solid #eee;
   margin: 0 0 5px;
-  text-shadow: 1px 1px 2px rgb(0,0,0);
+  text-shadow: 1px 1px 2px rgb(0, 0, 0);
 }
+
 #hud p {
   margin: 0 0 3px;
 }
+
 #hud input {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
+
 #hud input[type=text] {
   border: solid 1px #fff;
   padding: 4px;
   width: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   color: #fff;
 }
+
 #hud input[type=range] {
   margin: 3px 0;
   padding: 0;
@@ -148,33 +155,36 @@ body {
 
 .check {
   display: inline-block;
-  width:       14px;
-  height:      14px;
+  width: 14px;
+  height: 14px;
   line-height: 1;
   float: right;
   text-align: center;
 }
+
 .check:after {
   content: ' ';
   display: block;
-  width:       10px;
-  height:      10px;
+  width: 10px;
+  height: 10px;
   margin: 2px;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
+
 .coords {
   padding-bottom: 5px;
   margin-bottom: 10px;
   border-bottom: solid 1px #444;
   font-family: 'Oxygen Mono', Tahoma, Arial, sans-serif, "Courier New";
 }
-.coords > span {
+
+.coords>span {
   display: block;
   font-size: 1rem;
   float: left;
   width: 33%;
   text-align: center;
-  background: rgba(30,30,30,0.5);
+  background: rgba(30, 30, 30, 0.5);
   padding: 5px 0;
   line-height: 100%;
   border: solid 3px #000;
@@ -182,6 +192,7 @@ body {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
 }
+
 .coords:after {
   content: ' ';
   display: block;
@@ -199,17 +210,20 @@ body {
   border-bottom: 1px solid #eee;
   margin: 0 0 5px;
 }
+
 #system-search-heading h2 {
   border-bottom: none;
   margin: 0;
   flex: 1;
 }
+
 #file-upload-btn {
   /* Reset native button appearance across browsers */
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  forced-color-adjust: none; /* prevent Windows/Edge forced color inversion */
+  forced-color-adjust: none;
+  /* prevent Windows/Edge forced color inversion */
 
   background: transparent;
   border: none;
@@ -228,6 +242,7 @@ body {
   flex-shrink: 0;
   min-height: 28px;
 }
+
 #file-upload-btn:hover {
   color: #ff8c00;
 }
@@ -236,26 +251,29 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.72);
+  background: rgba(0, 0, 0, 0.72);
   z-index: 9000;
   align-items: center;
   justify-content: center;
 }
+
 #file-upload-overlay.active {
   display: flex;
 }
+
 #file-upload-dialog {
-  background: rgba(10,10,14,0.97);
+  background: rgba(10, 10, 14, 0.97);
   border: 1px solid #444;
   border-radius: 4px;
   padding: 24px 28px;
   max-width: 480px;
   width: 90%;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
   font-family: 'Oxygen Mono', Tahoma, Arial, sans-serif;
   color: #eee;
   position: relative;
 }
+
 #file-upload-dialog h3 {
   color: #ff8c00;
   font-size: 0.9rem;
@@ -263,12 +281,14 @@ body {
   letter-spacing: 0.08em;
   margin: 0 0 10px;
 }
+
 #file-upload-dialog p {
   font-size: 0.7rem;
   color: #aaa;
   margin: 0 0 16px;
   line-height: 1.5;
 }
+
 #file-upload-close {
   position: absolute;
   top: 10px;
@@ -281,7 +301,11 @@ body {
   line-height: 1;
   padding: 0;
 }
-#file-upload-close:hover { color: #ff8c00; }
+
+#file-upload-close:hover {
+  color: #ff8c00;
+}
+
 #file-upload-drop {
   border: 2px dashed #444;
   border-radius: 4px;
@@ -294,49 +318,80 @@ body {
   margin-bottom: 10px;
   display: block;
 }
+
 #file-upload-drop.drag-over,
 #file-upload-drop:hover {
   border-color: #ff8c00;
   color: #ff8c00;
 }
+
 #file-upload-drop.loading {
   border-color: #ffad33;
   color: #ffad33;
   cursor: default;
 }
-#file-upload-drop .fa { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-#file-upload-input { display: none; }
-@keyframes fu-spin { to { transform: rotate(360deg); } }
+
+#file-upload-drop .fa {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+#file-upload-input {
+  display: none;
+}
+
+@keyframes fu-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .fu-spinner {
   display: inline-block;
   width: 1.8rem;
   height: 1.8rem;
-  border: 3px solid rgba(255,140,0,0.25);
+  border: 3px solid rgba(255, 140, 0, 0.25);
   border-top-color: #ff8c00;
   border-radius: 50%;
   animation: fu-spin 0.75s linear infinite;
   margin-bottom: 8px;
 }
+
 #file-upload-messages {
   margin-top: 12px;
   max-height: 150px;
   overflow-y: auto;
   font-size: 0.65rem;
 }
+
 .fu-msg {
   padding: 4px 6px;
   border-radius: 2px;
   margin-bottom: 4px;
 }
-.fu-msg.success { background: rgba(0,180,80,0.15); color: #5eda8e; }
-.fu-msg.error   { background: rgba(200,30,30,0.15); color: #f07070; }
-.fu-msg.info    { background: rgba(255,140,0,0.08);  color: #ffad33; }
+
+.fu-msg.success {
+  background: rgba(0, 180, 80, 0.15);
+  color: #5eda8e;
+}
+
+.fu-msg.error {
+  background: rgba(200, 30, 30, 0.15);
+  color: #f07070;
+}
+
+.fu-msg.info {
+  background: rgba(255, 140, 0, 0.08);
+  color: #ffad33;
+}
+
 .fu-done-btn {
   display: block;
   width: 100%;
   margin-top: 8px;
   padding: 7px 10px;
-  background: rgba(0,180,80,0.15);
+  background: rgba(0, 180, 80, 0.15);
   border: 1px solid #5eda8e;
   border-radius: 3px;
   color: #5eda8e;
@@ -346,8 +401,9 @@ body {
   text-align: center;
   transition: background 0.15s;
 }
+
 .fu-done-btn:hover {
-  background: rgba(0,180,80,0.3);
+  background: rgba(0, 180, 80, 0.3);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -372,7 +428,7 @@ body {
   max-height: 200px;
   overflow-y: auto;
   z-index: 1100;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
 }
 
 #system-search-results li {
@@ -404,6 +460,7 @@ body {
   margin: 0 0 3px;
   cursor: pointer;
 }
+
 .map_filter:hover,
 .map_link:hover {
   color: #FF7207;
@@ -430,9 +487,10 @@ body {
 #filters {
   overflow-y: scroll;
   height: 80%;
-  padding-right:5px;
-  margin-right:-11px;
+  padding-right: 5px;
+  margin-right: -11px;
 }
+
 /* width */
 #filters::-webkit-scrollbar {
   width: 6px;
@@ -452,27 +510,32 @@ body {
 #filters::-webkit-scrollbar-thumb:hover {
   background: #ffad33;
 }
+
 #filters_form {
   margin-bottom: 10px
 }
+
 #filters_form select {
-  background:#000;
+  background: #000;
   border: solid 1px #FFF;
   padding: 4px 0 4px 0;
   margin: 0;
 }
+
 #filters_form option {
-  background:rgb(30,30,30);
+  background: rgb(30, 30, 30);
 }
+
 #filters_form option:checked,
 #filters_form option:hover,
-#filters_form option:active
-#filters_form option[selected=selected] {
-  background:#cc7a00;
+#filters_form option:active #filters_form option[selected=selected] {
+  background: #cc7a00;
 }
+
 #filters_form #select_hud_category {
-  display:none;
+  display: none;
 }
+
 #filters_form #filters_check_legacy {
   margin-left: 10px;
 }
@@ -484,10 +547,12 @@ body {
   cursor: pointer;
   font-size: 0.7rem;
 }
+
 /* Hiding the initial checkbox */
 #filters_form .checkbox input[type=checkbox] {
   visibility: hidden;
 }
+
 /* Creating a custom checkbox based on demand */
 .fakebox {
   position: absolute;
@@ -498,18 +563,22 @@ body {
   background-color: black;
   border: 1px solid white;
 }
+
 /* Specify the background color to be shown when hovering over checkbox */
-#filters_form .checkbox:hover input ~ .fakebox {
+#filters_form .checkbox:hover input~.fakebox {
   background-color: gray;
 }
+
 /* Specify the background color to be shown when checkbox is active */
-#filters_form .checkbox input:active ~ .fakebox {
+#filters_form .checkbox input:active~.fakebox {
   background-color: white;
 }
+
 /* Specify the background color to be shown when checkbox is checked */
-#filters_form .checkbox input:checked ~ .fakebox {
+#filters_form .checkbox input:checked~.fakebox {
   background-color: orange;
 }
+
 /* Checkmark to be shown in checkbox */
 /* It is not be shown when not checked */
 .fakebox:after {
@@ -517,10 +586,12 @@ body {
   position: absolute;
   display: none;
 }
+
 /* Display checkmark when checked */
-#filters_form .checkbox input:checked ~ .fakebox:after {
+#filters_form .checkbox input:checked~.fakebox:after {
   display: block;
 }
+
 /* Styling the checkmark using webkit */
 /* Rotated the rectangle by 45 degree and 
 showing only two border to make it look
@@ -539,11 +610,12 @@ like a tickmark */
 
 
 
-#hud.enlarge #filters > div.open {
+#hud.enlarge #filters>div.open {
   columns: 250px;
   -moz-columns: 250px;
   -webkit-columns: 250px;
 }
+
 #hud.enlarge .map_filter {
   width: 100%;
   max-width: 250px;
@@ -580,15 +652,16 @@ like a tickmark */
   width: 100%;
   text-align: center;
 }
-#nav > a {
+
+#nav>a {
   cursor: pointer;
   display: inline-block;
   width: 22%;
   margin: 2%;
   padding: 10px;
   border: solid 1px #222;
-  background: rgb(10,10,10);
-  background: rgba(10,10,10,0.8);
+  background: rgb(10, 10, 10);
+  background: rgba(10, 10, 10, 0.8);
   box-shadow: 1px 1px 3px #000;
   font-weight: bold;
   font-size: 1rem;
@@ -597,7 +670,7 @@ like a tickmark */
   -webkit-box-sizing: border-box;
 }
 
-#systemDetails > div {
+#systemDetails>div {
   max-height: 70%;
   overflow-y: auto;
 }
@@ -676,32 +749,35 @@ like a tickmark */
   z-index: 999;
   text-align: right;
 }
+
 #controls a {
   cursor: pointer;
 }
-#controls > a {
+
+#controls>a {
   display: inline-block;
-  width:  26px;
+  width: 26px;
   height: 26px;
   margin: 4px;
   font-size: 14px;
   line-height: 26px;
   text-align: center;
   color: #ddd;
-  color: rgba(255,255,255,0.8);
-  background: rgba(100,100,100,0.2);
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(100, 100, 100, 0.2);
   border: solid 1px #ddd;
-  border-color: rgba(255,255,255,0.2);
+  border-color: rgba(255, 255, 255, 0.2);
   cursor: pointer;
   border-radius: 4px;
   text-decoration: none;
 }
-#controls > a.selected {
+
+#controls>a.selected {
   color: #fff;
-  border-color: rgba(255,255,255,0.6);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
-#controls > a#tog-fullscreen {
+#controls>a#tog-fullscreen {
   width: auto;
   padding-left: 10px;
   padding-right: 10px;
@@ -709,12 +785,13 @@ like a tickmark */
 
 #options {
   clear: both;
-  background: rgb(0,0,0);
-  background: rgba(0,0,0,0.6);
-  border-color: rgba(50,50,50,0.6);
+  background: rgb(0, 0, 0);
+  background: rgba(0, 0, 0, 0.6);
+  border-color: rgba(50, 50, 50, 0.6);
   padding: 10px 15px;
   margin: 10px 0 0;
 }
+
 #options a {
   display: block;
   text-align: left;
@@ -722,13 +799,15 @@ like a tickmark */
   color: #555;
   font-size: 0.9rem;
 }
+
 #options a.active {
   color: #eee;
 }
+
 #options a:before {
   content: '-';
   display: inline-block;
-  width:  16px;
+  width: 16px;
   height: 16px;
   font-size: 14px;
   line-height: 1.1;
@@ -736,6 +815,7 @@ like a tickmark */
   margin-right: 5px;
   border: solid 1px #555;
 }
+
 #options a.active:before {
   content: 'X';
   border-color: #eee;
@@ -792,101 +872,130 @@ like a tickmark */
   right: 0;
   z-index: 1000;
   background-color: #111;
-  background-color: rgba(30,30,30,0.9);
+  background-color: rgba(30, 30, 30, 0.9);
 }
+
 #loader svg {
   margin: 150px auto;
   width: 200px;
   height: 200px;
 }
+
 #loader path {
   fill: #FF8C0D;
   stroke: #000;
   stroke-width: 0;
   opacity: 0;
 }
+
 @keyframes hideshow {
   0% {
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
   }
 }
+
 @keyframes inner {
   0% {
     opacity: 0;
   }
+
   10% {
     opacity: 1;
   }
+
   100% {
     opacity: 0;
   }
 }
+
 .l1 {
   animation: hideshow 750ms linear infinite;
 }
+
 .l2 {
   animation: inner 750ms linear infinite;
 }
+
 .d19 {
   animation-delay: 750ms;
 }
+
 .d18 {
   animation-delay: 710.52631579ms;
 }
+
 .d17 {
   animation-delay: 671.05263158ms;
 }
+
 .d16 {
   animation-delay: 631.57894737ms;
 }
+
 .d15 {
   animation-delay: 592.10526316ms;
 }
+
 .d14 {
   animation-delay: 552.63157895ms;
 }
+
 .d13 {
   animation-delay: 513.15789474ms;
 }
+
 .d12 {
   animation-delay: 473.68421053ms;
 }
+
 .d11 {
   animation-delay: 434.21052632ms;
 }
+
 .d10 {
   animation-delay: 394.73684211ms;
 }
+
 .d9 {
   animation-delay: 355.26315789ms;
 }
+
 .d8 {
   animation-delay: 315.78947368ms;
 }
+
 .d7 {
   animation-delay: 276.31578947ms;
 }
+
 .d6 {
   animation-delay: 236.84210526ms;
 }
+
 .d5 {
   animation-delay: 197.36842105ms;
 }
+
 .d4 {
   animation-delay: 157.89473684ms;
 }
+
 .d3 {
   animation-delay: 118.42105263ms;
 }
+
 .d2 {
   animation-delay: 78.94736842ms;
 }
+
 .d1 {
   animation-delay: 39.47368421ms;
 }

@@ -1,14 +1,14 @@
 ﻿
 var HUD = {
 
-  'container' : null,
-  'initialized' : false,
+  'container': null,
+  'initialized': false,
 
   /**
    * Called after each batch completes. Only runs full setup once;
    * on subsequent calls just refreshes the per-category counts.
    */
-  'init' : function() {
+  'init': function () {
 
     if (this.initialized) {
       // Just refresh the counts â€” don't re-bind events or re-init controls
@@ -27,13 +27,13 @@ var HUD = {
    * Update the (count) suffix on each filter label in place.
    * Safe to call repeatedly â€” replaces any existing count span.
    */
-  'updateFilterCounts' : function() {
-    $('.map_filter').each(function() {
+  'updateFilterCounts': function () {
+    $('.map_filter').each(function () {
       var idCat = $(this).data('filter');
       var count = (Ed3d.catObjs[idCat] && Ed3d.catObjs[idCat].length) || 0;
       $(this).find('.filter-count').remove();
       if (count > 1) {
-        $(this).append('<span class="filter-count"> ('+count+')</span>');
+        $(this).append('<span class="filter-count"> (' + count + ')</span>');
       }
     });
   },
@@ -41,35 +41,35 @@ var HUD = {
   /**
    *
    */
-  'create' : function(container) {
+  'create': function (container) {
 
     this.container = container;
 
-    if(!$('#'+this.container+' #controls').length && Ed3d.withOptionsPanel == true) {
+    if (!$('#' + this.container + ' #controls').length && Ed3d.withOptionsPanel == true) {
 
-      $('#'+this.container).append(
-        '  <div id="controls">'+
-        '    <a data-view="3d" class="view selected">3D</a>'+
-        '    <a data-view="top" class="view">2D</a>'+
+      $('#' + this.container).append(
+        '  <div id="controls">' +
+        '    <a data-view="3d" class="view selected">3D</a>' +
+        '    <a data-view="top" class="view">2D</a>' +
         //'    <a data-view="top" class="view">RED</a>'+  // TMP route edit button
-        '    <a data-view="infos" class="'+(Ed3d.showGalaxyInfos ? 'selected' : '')+'">i</a>'+
-        '    <a data-view="options">'+Ico.cog+'</a>'+
-        '    <div id="options" style="display:none;"></div>'+
+        '    <a data-view="infos" class="' + (Ed3d.showGalaxyInfos ? 'selected' : '') + '">i</a>' +
+        '    <a data-view="options">' + Ico.cog + '</a>' +
+        '    <div id="options" style="display:none;"></div>' +
         '  </div>'
       );
       this.createSubOptions();
 
       //-- Optionnal button to go fuulscreen
 
-      if(Ed3d.withFullscreenToggle) {
-        $( "<a></a>" )
-          .attr("id", "tog-fullscreen" )
+      if (Ed3d.withFullscreenToggle) {
+        $("<a></a>")
+          .attr("id", "tog-fullscreen")
           .html('Fullscreen')
-          .click(function() {
-            $('#'+container).toggleClass('map-fullscreen');
+          .click(function () {
+            $('#' + container).toggleClass('map-fullscreen');
             refresh3dMapSize();
           })
-          .prependTo( "#controls" );
+          .prependTo("#controls");
       }
 
 
@@ -96,81 +96,81 @@ var HUD = {
       );
     }
 
-    if(!Ed3d.withHudPanel) return;
+    if (!Ed3d.withHudPanel) return;
 
-    $('#'+this.container).append('<div id="hud"></div>');
+    $('#' + this.container).append('<div id="hud"></div>');
     $('#hud').append(
-      '<div>'+
-      '    <h2>Infos</h2>'+
-      '     Dist. Sol <span id="distsol"></span>'+
-      '    <div id="coords" class="coords">'+
-      '      <span id="cx"></span><span id="cy"></span><span id="cz"></span></div>'+
-      '      <p id="infos"></p>'+
-      '    </div>'+
-      '  <div id="system-search">'+
-      '    <div id="system-search-heading"><h2>System Search</h2><button id="file-upload-btn" title="Upload route / journal files"><i class="fa fa-folder-open"></i></button></div>'+
-      '    <div id="system-search-wrap">'+
-      '      <input type="text" id="system-search-input" placeholder="System name..." autocomplete="off" />'+
-      '      <ul id="system-search-results"></ul>'+
-      '    </div>'+
-      '  </div>'+
-      '  <div id="filters">'+
-      '  </div>'+
+      '<div>' +
+      '    <h2>Infos</h2>' +
+      '     Dist. Sol <span id="distsol"></span>' +
+      '    <div id="coords" class="coords">' +
+      '      <span id="cx"></span><span id="cy"></span><span id="cz"></span></div>' +
+      '      <p id="infos"></p>' +
+      '    </div>' +
+      '  <div id="system-search">' +
+      '    <div id="system-search-heading"><h2>System Search</h2><button id="file-upload-btn" title="Upload route / journal files"><i class="fa fa-folder-open"></i></button></div>' +
+      '    <div id="system-search-wrap">' +
+      '      <input type="text" id="system-search-input" placeholder="System name..." autocomplete="off" />' +
+      '      <ul id="system-search-results"></ul>' +
+      '    </div>' +
+      '  </div>' +
+      '  <div id="filters">' +
+      '  </div>' +
       '</div>'
     );
 
     // Append HUD toggle button as a sibling to #hud inside the container
-    $('#'+this.container).append(
-      '<button id="hud-toggle" title="Collapse panel" aria-label="Collapse panel" aria-expanded="true">'+
-      '<i class="fa fa-chevron-left"></i>'+
+    $('#' + this.container).append(
+      '<button id="hud-toggle" title="Collapse panel" aria-label="Collapse panel" aria-expanded="true">' +
+      '<i class="fa fa-chevron-left"></i>' +
       '</button>'
     );
 
     var addClass = (Ed3d.popupDetail ? 'class="popup-detail"' : '');
-    $('#'+this.container).append('<div id="systemDetails" style="display:none;"'+addClass+'></div>');
+    $('#' + this.container).append('<div id="systemDetails" style="display:none;"' + addClass + '></div>');
 
   },
 
   /**
    * Create option panel
    */
-  'createSubOptions' : function() {
+  'createSubOptions': function () {
 
     //-- Toggle milky way
-    $( "<a></a>" )
-      .addClass( "sub-opt active" )
+    $("<a></a>")
+      .addClass("sub-opt active")
       .html('Toggle Milky Way')
-      .click(function() {
+      .click(function () {
         var state = Galaxy.milkyway[0].visible;
         Galaxy.milkyway[0].visible = !state;
         Galaxy.milkyway[1].visible = !state;
-        Galaxy.milkyway2D.visible  = !state;
+        Galaxy.milkyway2D.visible = !state;
         $(this).toggleClass('active');
       })
-      .appendTo( "#options" );
+      .appendTo("#options");
 
     //-- Toggle Grid
-    $( "<a></a>" )
-      .addClass( "sub-opt active" )
+    $("<a></a>")
+      .addClass("sub-opt active")
       .html('Toggle grid')
-      .click(function() {
+      .click(function () {
         Ed3d.grid1H.toggleGrid();
         Ed3d.grid1K.toggleGrid();
         Ed3d.grid1XL.toggleGrid();
         $(this).toggleClass('active');
       })
-      .appendTo( "#options" );
+      .appendTo("#options");
 
   },
 
   /**
    * Controls init for camera views
    */
-  'initControls' : function() {
+  'initControls': function () {
 
-    $('#controls a').click(function(e) {
+    $('#controls a').click(function (e) {
 
-      if($(this).hasClass('view')) {
+      if ($(this).hasClass('view')) {
         $('#controls a.view').removeClass('selected')
         $(this).addClass('selected');
       }
@@ -178,24 +178,24 @@ var HUD = {
       var view = $(this).data('view');
 
 
-      switch(view) {
+      switch (view) {
 
         case 'top':
           Ed3d.isTopView = true;
-          var moveFrom = {x: camera.position.x, y: camera.position.y , z: camera.position.z};
-          var moveCoords = {x: controls.target.x, y: controls.target.y+500, z: controls.target.z};
-          HUD.moveCamera(moveFrom,moveCoords);
+          var moveFrom = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+          var moveCoords = { x: controls.target.x, y: controls.target.y + 500, z: controls.target.z };
+          HUD.moveCamera(moveFrom, moveCoords);
           break;
 
         case '3d':
           Ed3d.isTopView = false;
-          var moveFrom = {x: camera.position.x, y: camera.position.y , z: camera.position.z};
-          var moveCoords = {x: controls.target.x-100, y: controls.target.y+500, z: controls.target.z+500};
-          HUD.moveCamera(moveFrom,moveCoords);
+          var moveFrom = { x: camera.position.x, y: camera.position.y, z: camera.position.z };
+          var moveCoords = { x: controls.target.x - 100, y: controls.target.y + 500, z: controls.target.z + 500 };
+          HUD.moveCamera(moveFrom, moveCoords);
           break;
 
         case 'infos':
-          if(!Ed3d.showGalaxyInfos) {
+          if (!Ed3d.showGalaxyInfos) {
             Ed3d.showGalaxyInfos = true;
             Galaxy.infosShow();
           } else {
@@ -221,9 +221,9 @@ var HUD = {
   /**
    * Move camera to a target
    */
-  'moveCamera' : function(from, to) {
+  'moveCamera': function (from, to) {
 
-    Ed3d.tween = new TWEEN.Tween(from, {override:true}).to(to, 800)
+    Ed3d.tween = new TWEEN.Tween(from, { override: true }).to(to, 800)
       .start()
       .onUpdate(function () {
         camera.position.set(from.x, from.y, from.z);
@@ -237,10 +237,10 @@ var HUD = {
   /**
    *
    */
-  'initHudAction' : function() {
+  'initHudAction': function () {
 
     //-- HUD panel toggle button
-    (function() {
+    (function () {
       var $toggle = $('#hud-toggle');
 
       function getActivePanel() {
@@ -248,28 +248,28 @@ var HUD = {
       }
 
       function syncTogglePosition(animate) {
-        var $panel     = getActivePanel();
-        var collapsed  = $panel.hasClass('hud-collapsed');
+        var $panel = getActivePanel();
+        var collapsed = $panel.hasClass('hud-collapsed');
         var targetLeft = collapsed ? 0 : $panel.outerWidth();
         if (animate) {
           $toggle.css('left', targetLeft + 'px');
         } else {
           $toggle.css({ transition: 'none', left: targetLeft + 'px' });
-          setTimeout(function() { $toggle.css('transition', ''); }, 50);
+          setTimeout(function () { $toggle.css('transition', ''); }, 50);
         }
       }
 
       // Expose so openHudDetails / closeHudDetails can reposition the button
-      HUD.repositionToggle = function(animate) {
+      HUD.repositionToggle = function (animate) {
         syncTogglePosition(animate !== false);
       };
 
       // Set initial position without animation
       syncTogglePosition(false);
 
-      $toggle.on('click touchend', function(e) {
+      $toggle.on('click touchend', function (e) {
         e.preventDefault();
-        var $panel   = getActivePanel();
+        var $panel = getActivePanel();
         var collapsed = $panel.toggleClass('hud-collapsed').hasClass('hud-collapsed');
         $toggle.attr('aria-expanded', collapsed ? 'false' : 'true');
         $toggle.attr('title', collapsed ? 'Expand panel' : 'Collapse panel');
@@ -282,19 +282,19 @@ var HUD = {
     })();
 
     //-- Disable 3D controls when mouse hover the Hud
-    $( "canvas" ).hover(
-      function() {
+    $("canvas").hover(
+      function () {
         controls.enabled = true;
-      }, function() {
+      }, function () {
         controls.enabled = false;
       }
     );
 
     //-- Disable 3D controls when mouse is over either HUD panel
-    $( "#hud, #systemDetails" ).hover(
-      function() {
+    $("#hud, #systemDetails").hover(
+      function () {
         controls.enabled = false;
-      }, function() {
+      }, function () {
         controls.enabled = true;
       }
     );
@@ -303,12 +303,12 @@ var HUD = {
     //   panels into OrbitControls.  Must be a DIRECT binding (not delegated)
     //   so stopPropagation fires before the event bubbles to #ed3dmap where
     //   OrbitControls is registered.
-    $( '#hud, #systemDetails' ).on(
+    $('#hud, #systemDetails').on(
       'mousedown pointerdown touchstart touchmove touchend wheel click contextmenu',
-      function(e) { e.stopPropagation(); }
+      function (e) { e.stopPropagation(); }
     );
 
-    $( "#systemDetails" ).hide();
+    $("#systemDetails").hide();
 
     // -----------------------------------------------------------------------
     // File Upload Dialog
@@ -334,9 +334,9 @@ var HUD = {
         document.getElementById('ed3dmap').appendChild(overlay);
       }
 
-      var $overlay  = $('#file-upload-overlay');
-      var $drop     = $('#file-upload-drop');
-      var $input    = $('#file-upload-input');
+      var $overlay = $('#file-upload-overlay');
+      var $drop = $('#file-upload-drop');
+      var $input = $('#file-upload-input');
       var $messages = $('#file-upload-messages');
       var routeCounter = 0;
 
@@ -451,11 +451,11 @@ var HUD = {
       // Legacy: Spansh neutron-router route
       function isSpanshRoute(data) {
         return data &&
-          typeof data.job       === 'string' &&
-          typeof data.state     === 'string' &&
-          typeof data.status    === 'string' &&
+          typeof data.job === 'string' &&
+          typeof data.state === 'string' &&
+          typeof data.status === 'string' &&
           data.parameters !== undefined &&
-          data.result     !== undefined;
+          data.result !== undefined;
       }
 
       // A small palette of distinct colours for per-commander routes
@@ -463,8 +463,8 @@ var HUD = {
         0xFF9D00, 0x00BFFF, 0x7FFF00, 0xFF69B4, 0xDA70D6,
         0x40E0D0, 0xFF6347, 0xADFF2F, 0xFFD700, 0x87CEEB
       ];
-      var cmdrColorMap  = {};  // cmdrName -> THREE.Color hex
-      var cmdrColorIdx  = 0;
+      var cmdrColorMap = {};  // cmdrName -> THREE.Color hex
+      var cmdrColorIdx = 0;
 
       function cmdrColor(name) {
         if (!cmdrColorMap[name]) {
@@ -503,10 +503,10 @@ var HUD = {
 
       function isSpanshSearch(data) {
         return data &&
-          typeof data.count          === 'number' &&
-          typeof data.from           === 'number' &&
+          typeof data.count === 'number' &&
+          typeof data.from === 'number' &&
           typeof data.search_reference === 'string' &&
-          data.reference  !== undefined &&
+          data.reference !== undefined &&
           Array.isArray(data.results);
       }
 
@@ -526,7 +526,7 @@ var HUD = {
             return { system: s.StarSystem, x: s.StarPos[0], y: s.StarPos[1], z: s.StarPos[2] };
           });
           var from = jumps[0].system;
-          var to   = jumps[jumps.length - 1].system;
+          var to = jumps[jumps.length - 1].system;
           displaySpanshRoute(filename, from, to, jumps, done);
           return;
         }
@@ -538,9 +538,9 @@ var HUD = {
           }
           // Determine from/to — may be in result or parameters depending on format
           var fromSys = (data.result && data.result.source_system) ||
-                        (data.parameters && data.parameters.source_system) || '';
-          var toSys   = (data.result && data.result.destination_system) ||
-                        (data.parameters && data.parameters.destination_system) || '';
+            (data.parameters && data.parameters.source_system) || '';
+          var toSys = (data.result && data.result.destination_system) ||
+            (data.parameters && data.parameters.destination_system) || '';
           // Format A: result.system_jumps — each jump has a 'system' field
           var jumps = data.result && data.result.system_jumps;
           // Format B: result.jumps — each jump has a 'name' field; normalise to format A
@@ -552,13 +552,13 @@ var HUD = {
               });
             }
           }
-            // Format C: result is an array of waypoints (Canonn/Spansh export)
-            if ((!jumps || jumps.length === 0) && Array.isArray(data.result)) {
-              jumps = data.result.map(function (wp) {
-                var sys = wp.system || wp.name || '';
-                return { system: sys, x: wp.x, y: wp.y, z: wp.z };
-              }).filter(function (j) { return j.system && j.x !== undefined && j.y !== undefined && j.z !== undefined; });
-            }
+          // Format C: result is an array of waypoints (Canonn/Spansh export)
+          if ((!jumps || jumps.length === 0) && Array.isArray(data.result)) {
+            jumps = data.result.map(function (wp) {
+              var sys = wp.system || wp.name || '';
+              return { system: sys, x: wp.x, y: wp.y, z: wp.z };
+            }).filter(function (j) { return j.system && j.x !== undefined && j.y !== undefined && j.z !== undefined; });
+          }
           if (!jumps || jumps.length === 0) {
             addMessage(filename + ': Spansh route has no system jumps.', 'error');
             done();
@@ -576,7 +576,7 @@ var HUD = {
             return { system: sys, x: wp.x, y: wp.y, z: wp.z };
           }).filter(function (j) { return j.system && j.x !== undefined && j.y !== undefined && j.z !== undefined; });
           var fromSys = jumps.length > 0 ? jumps[0].system : '';
-          var toSys   = jumps.length > 0 ? jumps[jumps.length-1].system : '';
+          var toSys = jumps.length > 0 ? jumps[jumps.length - 1].system : '';
           if (jumps.length === 0) {
             addMessage(filename + ': Route file has no valid systems.', 'error');
             done();
@@ -625,7 +625,7 @@ var HUD = {
             currentCmdr = ev.Name;
           }
           if ((ev.event === 'FSDJump' || ev.event === 'Location' || ev.event === 'CarrierJump') &&
-              ev.StarSystem && Array.isArray(ev.StarPos) && ev.StarPos.length === 3) {
+            ev.StarSystem && Array.isArray(ev.StarPos) && ev.StarPos.length === 3) {
             if (!cmdrs[currentCmdr]) cmdrs[currentCmdr] = [];
             var last = cmdrs[currentCmdr];
             // Deduplicate consecutive identical systems
@@ -646,7 +646,7 @@ var HUD = {
         function nextCmdr() {
           if (ci >= cmdrNames.length) { done(); return; }
           var cmdrName = cmdrNames[ci++];
-          var systems  = cmdrs[cmdrName];
+          var systems = cmdrs[cmdrName];
           addMessage(filename + ' \u2014 Commander ' + cmdrName + ': ' + systems.length + ' systems.', 'info');
           displayJournalRoute(filename, cmdrName, systems, nextCmdr);
         }
@@ -654,8 +654,8 @@ var HUD = {
       }
 
       function displayJournalRoute(filename, cmdrName, systems, done) {
-        var idx   = ++routeCounter;
-        var name  = 'journal-route-' + idx;
+        var idx = ++routeCounter;
+        var name = 'journal-route-' + idx;
         var color = cmdrColor(cmdrName);
 
         if (!System.particleGeo) System.initParticleSystem();
@@ -686,8 +686,8 @@ var HUD = {
               geo.vertices.push(new THREE.Vector3(s.x, s.y, -s.z));
             });
             var lineMat = new THREE.LineBasicMaterial({ color: color });
-            var line    = new THREE.Line(geo, lineMat);
-            line.name   = name;
+            var line = new THREE.Line(geo, lineMat);
+            line.name = name;
             scene.add(line);
           }
 
@@ -741,9 +741,9 @@ var HUD = {
             System.endParticleSystem();
             $status.removeClass('info').addClass('success')
               .text(filename + ': Loaded \u2014 ' + systems.length + ' system(s)' +
-                    (ref ? ' near ' + ref : '') + ' (results ' +
-                    data.from + '\u2013' + (data.from + systems.length - 1) +
-                    ' of ' + data.count + ').');
+                (ref ? ' near ' + ref : '') + ' (results ' +
+                data.from + '\u2013' + (data.from + systems.length - 1) +
+                ' of ' + data.count + ').');
             $messages.scrollTop($messages[0].scrollHeight);
             done();
           }
@@ -752,7 +752,7 @@ var HUD = {
       }
 
       function displaySpanshRoute(filename, from, to, jumps, done) {
-        var idx  = ++routeCounter;
+        var idx = ++routeCounter;
         var name = 'spansh-route-' + idx;
 
         // Ensure the particle system is ready (it should be after initial load)
@@ -814,22 +814,22 @@ var HUD = {
     HUD.updateFilterCounts();
 
     //-- Add map filters (delegated so dynamically-added filters also respond)
-    $('#filters').on('click', '.map_filter', function(e) {
+    $('#filters').on('click', '.map_filter', function (e) {
       e.preventDefault();
       var idCat = $(this).data('filter');
       var active = $(this).data('active');
-      active = (Math.abs(active-1));
+      active = (Math.abs(active - 1));
 
       //------------------------------------------------------------------------
       //-- Single item by once
 
-      if(!Ed3d.hudMultipleSelect) {
+      if (!Ed3d.hudMultipleSelect) {
 
         $('.map_filter').addClass('disabled');
 
         //-- Toggle systems particles
-        $(System.particleGeo.vertices).each(function(index, point) {
-          point.visible  = 0;
+        $(System.particleGeo.vertices).each(function (index, point) {
+          point.visible = 0;
           point.filtered = 0;
           System.particleGeo.colors[index] = new THREE.Color('#111111');
           active = 1;
@@ -837,17 +837,17 @@ var HUD = {
 
 
         //-- Toggle routes
-        if(Ed3d.catObjsRoutes.length>0)
-        $(Ed3d.catObjsRoutes).each(function(indexCat, listGrpRoutes) {
-          if(listGrpRoutes != undefined)
-            $(listGrpRoutes).each(function(key, indexRoute) {
-              scene.getObjectByName( indexRoute ).visible  = false;
-              if(scene.getObjectByName( indexRoute+'-first' ) != undefined)
-                scene.getObjectByName( indexRoute+'-first' ).visible  = false;
-              if(scene.getObjectByName( indexRoute+'-last' ) != undefined)
-                scene.getObjectByName( indexRoute+'-last' ).visible  = false;
-            });
-        });
+        if (Ed3d.catObjsRoutes.length > 0)
+          $(Ed3d.catObjsRoutes).each(function (indexCat, listGrpRoutes) {
+            if (listGrpRoutes != undefined)
+              $(listGrpRoutes).each(function (key, indexRoute) {
+                scene.getObjectByName(indexRoute).visible = false;
+                if (scene.getObjectByName(indexRoute + '-first') != undefined)
+                  scene.getObjectByName(indexRoute + '-first').visible = false;
+                if (scene.getObjectByName(indexRoute + '-last') != undefined)
+                  scene.getObjectByName(indexRoute + '-last').visible = false;
+              });
+          });
 
       }
 
@@ -860,36 +860,36 @@ var HUD = {
 
       //-- Toggle routes
 
-      if(Ed3d.catObjsRoutes.length>0)
-      $(Ed3d.catObjsRoutes[idCat]).each(function(key, indexRoute) {
-        var isVisible = scene.getObjectByName( indexRoute ).visible;
-        if(isVisible == undefined) isVisible = true;
-        isVisible = (isVisible ? false : true);
-        scene.getObjectByName( indexRoute ).visible  = isVisible;
-        if(scene.getObjectByName( indexRoute+'-first' ) != undefined)
-          scene.getObjectByName( indexRoute+'-first' ).visible  = isVisible;
-        if(scene.getObjectByName( indexRoute+'-last' ) != undefined)
-          scene.getObjectByName( indexRoute+'-last' ).visible  = isVisible;
-      });
+      if (Ed3d.catObjsRoutes.length > 0)
+        $(Ed3d.catObjsRoutes[idCat]).each(function (key, indexRoute) {
+          var isVisible = scene.getObjectByName(indexRoute).visible;
+          if (isVisible == undefined) isVisible = true;
+          isVisible = (isVisible ? false : true);
+          scene.getObjectByName(indexRoute).visible = isVisible;
+          if (scene.getObjectByName(indexRoute + '-first') != undefined)
+            scene.getObjectByName(indexRoute + '-first').visible = isVisible;
+          if (scene.getObjectByName(indexRoute + '-last') != undefined)
+            scene.getObjectByName(indexRoute + '-last').visible = isVisible;
+        });
 
       //-- Toggle systems particles
 
-      $(Ed3d.catObjs[idCat]).each(function(key, indexPoint) {
+      $(Ed3d.catObjs[idCat]).each(function (key, indexPoint) {
 
         obj = System.particleGeo.vertices[indexPoint];
 
-        System.particleGeo.colors[indexPoint] = (active==1)
+        System.particleGeo.colors[indexPoint] = (active == 1)
           ? obj.color
           : new THREE.Color('#111111');
 
-        obj.visible = (active==1);
-        obj.filtered = (active==1);
+        obj.visible = (active == 1);
+        obj.filtered = (active == 1);
 
         System.particleGeo.colorsNeedUpdate = true;
 
         //-- Sum coords to detect the center & detect the most far point
-        if(center == null) {
-          center   = new THREE.Vector3(obj.x, obj.y, obj.z);
+        if (center == null) {
+          center = new THREE.Vector3(obj.x, obj.y, obj.z);
           pointFar = new THREE.Vector3(obj.x, obj.y, obj.z);
         } else {
           center.set(
@@ -897,9 +897,9 @@ var HUD = {
             (center.y + obj.y),
             (center.z + obj.z)
           );
-          if(
-            (Math.abs(pointFar.x) - Math.abs(obj.x))+
-            (Math.abs(pointFar.y) - Math.abs(obj.y))+
+          if (
+            (Math.abs(pointFar.x) - Math.abs(obj.x)) +
+            (Math.abs(pointFar.y) - Math.abs(obj.y)) +
             (Math.abs(pointFar.z) - Math.abs(obj.z)) < 0
           ) {
             pointFar.set(obj.x, obj.y, obj.z);
@@ -909,25 +909,25 @@ var HUD = {
 
       });
 
-      if(nbPoint==0) return;
+      if (nbPoint == 0) return;
 
       //------------------------------------------------------------------------
       //-- Calc center of all selected points
 
       center.set(
-        Math.round(center.x/nbPoint),
-        Math.round(center.y/nbPoint),
-        -Math.round(center.z/nbPoint)
+        Math.round(center.x / nbPoint),
+        Math.round(center.y / nbPoint),
+        -Math.round(center.z / nbPoint)
       );
 
-      $(this).data('active',active);
+      $(this).data('active', active);
       $(this).toggleClass('disabled');
 
       //-- If current selection is no more visible, disable active selection
-      if(Action.oldSel != null && !Action.oldSel.visible) Action.disableSelection();
+      if (Action.oldSel != null && !Action.oldSel.visible) Action.disableSelection();
 
       //-- Calc max distance from center of selection
-      var distance = pointFar.distanceTo( center )+200;
+      var distance = pointFar.distanceTo(center) + 200;
 
       //-- Set new camera & target position
       //Ed3d.playerPos = [center.x,center.y,center.z];
@@ -942,14 +942,14 @@ var HUD = {
 
 
     //-- Add map link (delegated)
-    $('#hud').on('click', '.map_link', function(e) {
+    $('#hud').on('click', '.map_link', function (e) {
 
       e.preventDefault();
       var elId = $(this).data('route');
       Action.moveToObj(routes[elId]);
     });
 
-    $('#hud').on('click', '.map_link span', function(e) {
+    $('#hud').on('click', '.map_link span', function (e) {
 
       e.preventDefault();
 
@@ -967,7 +967,7 @@ var HUD = {
    * New groups and items are appended; existing ones are skipped.
    */
 
-  'initFilters' : function(categories) {
+  'initFilters': function (categories) {
 
     Loader.update('HUD Filter...');
 
@@ -976,9 +976,9 @@ var HUD = {
     if (!HUD.filterGroupIds) HUD.filterGroupIds = {};
     var grpNb = Object.keys(HUD.filterGroupIds).length + 1;
 
-    $.each(categories, function(typeFilter, values) {
+    $.each(categories, function (typeFilter, values) {
 
-      if(typeof values === "object" ) {
+      if (typeof values === "object") {
 
         var groupId;
         var isNewGroup = !HUD.filterGroupIds[typeFilter];
@@ -987,8 +987,8 @@ var HUD = {
           // Create the group header and container
           groupId = 'group_' + grpNb;
           HUD.filterGroupIds[typeFilter] = groupId;
-          $('#filters').append('<h2>'+typeFilter+'</h2>');
-          $('#filters').append('<div id="'+groupId+'"></div>');
+          $('#filters').append('<h2>' + typeFilter + '</h2>');
+          $('#filters').append('<div id="' + groupId + '"></div>');
           grpNb++;
         } else {
           groupId = HUD.filterGroupIds[typeFilter];
@@ -999,7 +999,7 @@ var HUD = {
         var visible = true;
         var addedAny = false;
 
-        $.each(values, function(key, val) {
+        $.each(values, function (key, val) {
 
           // Skip items already registered
           if (Ed3d.catObjs[key] !== undefined) return;
@@ -1007,9 +1007,9 @@ var HUD = {
           visible = true;
 
           //-- Manage view limit if activated
-          if(Ed3d.categoryAutoCollapseSize !== false) {
+          if (Ed3d.categoryAutoCollapseSize !== false) {
             count++;
-            if(count>Ed3d.categoryAutoCollapseSize) visible = false;
+            if (count > Ed3d.categoryAutoCollapseSize) visible = false;
           }
 
           //-- Add filter
@@ -1020,12 +1020,12 @@ var HUD = {
         });
 
         // Add/update the "See more" toggle if needed
-        if (addedAny && visible == false && $('#'+groupId+' .show_childs').length === 0) {
-          $('#'+groupId).append(
-            '<a class="show_childs">'+
+        if (addedAny && visible == false && $('#' + groupId + ' .show_childs').length === 0) {
+          $('#' + groupId).append(
+            '<a class="show_childs">' +
             '+ See more' +
             '</a>'
-          ).click(function(){
+          ).click(function () {
             HUD.expandFilters(groupId);
           });
         }
@@ -1043,7 +1043,7 @@ var HUD = {
   /**
    * System typeahead search
    */
-  'initSystemSearch' : function() {
+  'initSystemSearch': function () {
 
     var currentSuggestions = [];
     var debounceTimer = null;
@@ -1108,15 +1108,15 @@ var HUD = {
       }
     }
 
-    $(document).on('input', '#system-search-input', function() {
+    $(document).on('input', '#system-search-input', function () {
       clearTimeout(debounceTimer);
       var q = $(this).val().trim();
       if (q.length < 2) {
         closeResults();
         return;
       }
-      debounceTimer = setTimeout(function() {
-        $.getJSON(getApiUrl(q), function(data) {
+      debounceTimer = setTimeout(function () {
+        $.getJSON(getApiUrl(q), function (data) {
           currentSuggestions = (data && data.min_max) ? data.min_max : [];
           var values = (data && data.values) ? data.values : [];
           var $ul = $('#system-search-results');
@@ -1125,8 +1125,8 @@ var HUD = {
             $ul.hide();
             return;
           }
-          $.each(values, function(i, name) {
-            $('<li/>').text(name).on('click', function() {
+          $.each(values, function (i, name) {
+            $('<li/>').text(name).on('click', function () {
               selectSystem($(this).text());
             }).appendTo($ul);
           });
@@ -1136,7 +1136,7 @@ var HUD = {
       }, 300);
     });
 
-    $(document).on('keydown', '#system-search-input', function(e) {
+    $(document).on('keydown', '#system-search-input', function (e) {
       var $items = $('#system-search-results li');
       if (!$items.length) return;
       if (e.key === 'ArrowDown') {
@@ -1159,7 +1159,7 @@ var HUD = {
       }
     });
 
-    $(document).on('click', function(e) {
+    $(document).on('click', function (e) {
       if (!$(e.target).closest('#system-search-wrap').length) {
         closeResults();
       }
@@ -1167,9 +1167,9 @@ var HUD = {
 
   },
 
-  'expandFilters' : function(groupId) {
+  'expandFilters': function (groupId) {
 
-    $('#'+groupId)
+    $('#' + groupId)
       .addClass('open');
 
     $('#hud').addClass('enlarge');
@@ -1222,10 +1222,10 @@ var HUD = {
       var dist = camera.position.distanceTo(controls.target);
       var speed = dist * 0.04;
       var right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
-      var up    = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+      var up = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
       var offset = new THREE.Vector3()
         .addScaledVector(right, dx * speed)
-        .addScaledVector(up,    dy * speed);
+        .addScaledVector(up, dy * speed);
       camera.position.add(offset);
       controls.target.add(offset);
       controls.update();
@@ -1241,12 +1241,12 @@ var HUD = {
 
     $(document).on('mouseup touchend touchcancel', stopRepeat);
 
-    bindNavBtn('nav-zoom-in',   zoomIn);
-    bindNavBtn('nav-zoom-out',  zoomOut);
-    bindNavBtn('nav-pan-up',    function () { panCamera( 0,  1); });
-    bindNavBtn('nav-pan-down',  function () { panCamera( 0, -1); });
-    bindNavBtn('nav-pan-left',  function () { panCamera(-1,  0); });
-    bindNavBtn('nav-pan-right', function () { panCamera( 1,  0); });
+    bindNavBtn('nav-zoom-in', zoomIn);
+    bindNavBtn('nav-zoom-out', zoomOut);
+    bindNavBtn('nav-pan-up', function () { panCamera(0, 1); });
+    bindNavBtn('nav-pan-down', function () { panCamera(0, -1); });
+    bindNavBtn('nav-pan-left', function () { panCamera(-1, 0); });
+    bindNavBtn('nav-pan-right', function () { panCamera(1, 0); });
 
     $('#nav-pan-reset').on('mousedown touchstart', function (e) {
       e.preventDefault();
@@ -1265,7 +1265,7 @@ var HUD = {
    * Remove filters list
    */
 
-  'removeFilters' : function() {
+  'removeFilters': function () {
 
     $('#hud #filters').html('');
 
@@ -1275,25 +1275,25 @@ var HUD = {
   /**
    *
    */
-  'addFilter' : function(groupId, idCat, val, visible) {
+  'addFilter': function (groupId, idCat, val, visible) {
 
     //-- Add material, if custom color defined, use it
     var back = '#fff';
     var addClass = '';
 
-    if(val.color != undefined) {
+    if (val.color != undefined) {
       Ed3d.addCustomMaterial(idCat, val.color);
-      back = '#'+val.color;
+      back = '#' + val.color;
     }
 
-    if(!visible) {
+    if (!visible) {
       addClass += ' hidden';
     }
 
     //-- Add html link
-    $('#'+groupId).append(
-      '<a class="map_filter'+addClass+'" data-active="1" data-filter="' + idCat + '">'+
-      '<span class="check" style="background:'+back+'"> </span>' + val.name +
+    $('#' + groupId).append(
+      '<a class="map_filter' + addClass + '" data-active="1" data-filter="' + idCat + '">' +
+      '<span class="check" style="background:' + back + '"> </span>' + val.name +
       '</a>'
     );
   },
@@ -1301,42 +1301,42 @@ var HUD = {
   /**
    *
    */
-  'openHudDetails' : function() {
+  'openHudDetails': function () {
     $('#hud').hide();
     $('#systemDetails').removeClass('hud-collapsed').show().hover(
-      function() {
+      function () {
         controls.enabled = false;
-      }, function() {
+      }, function () {
         controls.enabled = true;
       }
     );
     // Restore toggle icon to open state and reposition against the detail panel
     var $toggle = $('#hud-toggle');
     $toggle.attr('aria-expanded', 'true')
-           .attr('title', 'Collapse panel')
-           .attr('aria-label', 'Collapse panel')
-           .find('i').removeClass('fa-chevron-right').addClass('fa-chevron-left');
+      .attr('title', 'Collapse panel')
+      .attr('aria-label', 'Collapse panel')
+      .find('i').removeClass('fa-chevron-right').addClass('fa-chevron-left');
     if (HUD.repositionToggle) HUD.repositionToggle(true);
   },
   /**
    *
    */
-  'closeHudDetails' : function() {
+  'closeHudDetails': function () {
     $('#systemDetails').hide().removeClass('hud-collapsed');
     $('#hud').removeClass('hud-collapsed').show();
     // Restore toggle icon and reposition against the main hud panel
     var $toggle = $('#hud-toggle');
     $toggle.attr('aria-expanded', 'true')
-           .attr('title', 'Collapse panel')
-           .attr('aria-label', 'Collapse panel')
-           .find('i').removeClass('fa-chevron-right').addClass('fa-chevron-left');
+      .attr('title', 'Collapse panel')
+      .attr('aria-label', 'Collapse panel')
+      .find('i').removeClass('fa-chevron-right').addClass('fa-chevron-left');
     if (HUD.repositionToggle) HUD.repositionToggle(false);
   },
 
   /**
    * Create a Line route
    */
-  'setRoute' : function(idRoute, nameR) {
+  'setRoute': function (idRoute, nameR) {
     $('#routes').append('<a class="map_link" data-route="' + idRoute + '"><span class="check"> </span>' + nameR + '</a>');
   },
 
@@ -1346,33 +1346,33 @@ var HUD = {
    *
    */
 
-  'setInfoPanel' : function(index, point) {
+  'setInfoPanel': function (index, point) {
 
     var html =
-      '<h2>'+point.name+'</h2>'+
-      '<div class="coords">'+
-      '  <span>'+point.x+'</span><span>'+point.y+'</span><span>'+(-point.z)+'</span>'+
-      '</div>'+
-      (point.infos != undefined && point.infos !== '' ? '<div>'+point.infos+'</div>' : '')+
-      '<div class="hover-distance"></div>'+
-      '<div id="nav">'+
+      '<h2>' + point.name + '</h2>' +
+      '<div class="coords">' +
+      '  <span>' + point.x + '</span><span>' + point.y + '</span><span>' + (-point.z) + '</span>' +
+      '</div>' +
+      (point.infos != undefined && point.infos !== '' ? '<div>' + point.infos + '</div>' : '') +
+      '<div class="hover-distance"></div>' +
+      '<div id="nav">' +
       '</div>';
 
     $('#systemDetails').html(html);
 
     //-- Add navigation
 
-    $('<a/>', {'html': '<'})
-    .click(function(){Action.moveNextPrev(index-1, -1);})
-    .appendTo("#nav");
+    $('<a/>', { 'html': '<' })
+      .click(function () { Action.moveNextPrev(index - 1, -1); })
+      .appendTo("#nav");
 
-    $('<a/>', {'html': 'X'})
-    .click(function(){HUD.closeHudDetails();})
-    .appendTo("#nav");
+    $('<a/>', { 'html': 'X' })
+      .click(function () { HUD.closeHudDetails(); })
+      .appendTo("#nav");
 
-    $('<a/>', {'html': '>'})
-    .click(function(){Action.moveNextPrev(index+1, 1);})
-    .appendTo("#nav");
+    $('<a/>', { 'html': '>' })
+      .click(function () { Action.moveNextPrev(index + 1, 1); })
+      .appendTo("#nav");
 
   },
 
@@ -1381,10 +1381,10 @@ var HUD = {
    * Add Shape text
    */
 
-  'addText' : function(id, textShow, x, y, z, size, addToObj, isPoint) {
+  'addText': function (id, textShow, x, y, z, size, addToObj, isPoint) {
 
-    if(addToObj == undefined) addToObj = scene;
-    if(isPoint == undefined) isPoint = false;
+    if (addToObj == undefined) addToObj = scene;
+    if (isPoint == undefined) isPoint = false;
 
     var textShapes = THREE.FontUtils.generateShapes(textShow, {
       'font': 'helvetiker',
@@ -1396,7 +1396,7 @@ var HUD = {
 
     var textGeo = new THREE.ShapeGeometry(textShapes);
 
-    if(Ed3d.textSel[id] == undefined) {
+    if (Ed3d.textSel[id] == undefined) {
       var textMesh = new THREE.Mesh(textGeo, new THREE.MeshBasicMaterial({
         color: 0xffffff
       }));
@@ -1407,7 +1407,7 @@ var HUD = {
     textMesh.geometry = textGeo;
     textMesh.geometry.needsUpdate = true;
 
-    if(isPoint) {
+    if (isPoint) {
       textMesh.position.set(addToObj.x, addToObj.y, addToObj.z);
       textMesh.name = id;
       scene.add(textMesh);
@@ -1424,13 +1424,13 @@ var HUD = {
    * Add Shape text
    */
 
-  'rotateText' : function(id) {
+  'rotateText': function (id) {
 
     //y = -Math.abs(y);
 
-    if(Ed3d.textSel[id] != undefined)
-      if(Ed3d.isTopView) {
-        Ed3d.textSel[id].rotation.set(-Math.PI/2,0,0);
+    if (Ed3d.textSel[id] != undefined)
+      if (Ed3d.isTopView) {
+        Ed3d.textSel[id].rotation.set(-Math.PI / 2, 0, 0);
       } else {
         Ed3d.textSel[id].rotation.x = 0;
         Ed3d.textSel[id].rotation.y = camera.rotation.y;
