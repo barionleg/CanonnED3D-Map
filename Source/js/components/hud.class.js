@@ -679,13 +679,19 @@ var HUD = {
       }
 
       function displaySpanshSearch(filename, data, done) {
-        // Deduplicate by system_name — multiple bodies can share the same system
+        // Deduplicate by system name — multiple bodies can share the same system.
+        // Body-search results use system_name/system_x/y/z; system-search results
+        // use name/x/y/z directly on each result entry.
         var seen = {};
         var systems = [];
         data.results.forEach(function (r) {
-          if (r.system_name && !seen[r.system_name]) {
-            seen[r.system_name] = true;
-            systems.push({ system: r.system_name, x: r.system_x, y: r.system_y, z: r.system_z });
+          var sysName = r.system_name || r.name;
+          var sx = (r.system_x !== undefined) ? r.system_x : r.x;
+          var sy = (r.system_y !== undefined) ? r.system_y : r.y;
+          var sz = (r.system_z !== undefined) ? r.system_z : r.z;
+          if (sysName && sx !== undefined && sy !== undefined && sz !== undefined && !seen[sysName]) {
+            seen[sysName] = true;
+            systems.push({ system: sysName, x: sx, y: sy, z: sz });
           }
         });
 
