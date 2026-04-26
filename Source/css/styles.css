@@ -603,6 +603,70 @@ like a tickmark */
 }
 
 /* -------------------------------------------------------------------------- */
+/* 3D Navigation Controls (Zoom + Pan)                                        */
+/* -------------------------------------------------------------------------- */
+
+#nav-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  pointer-events: all;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(100, 100, 100, 0.2);
+  border: solid 1px rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  text-decoration: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.nav-btn:hover {
+  color: #fff;
+  background: rgba(150, 150, 150, 0.35);
+  border-color: rgba(255, 255, 255, 0.5);
+  text-decoration: none;
+}
+
+.nav-btn:active {
+  background: rgba(200, 200, 200, 0.25);
+}
+
+#nav-controls .nav-zoom {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+#nav-controls .nav-pan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+#nav-controls .nav-pan-row {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+}
+
+/* -------------------------------------------------------------------------- */
 /* controls */
 /* -------------------------------------------------------------------------- */
 #controls {

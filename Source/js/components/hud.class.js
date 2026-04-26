@@ -19,6 +19,7 @@ var HUD = {
     Loader.update('Init HUD');
     this.initHudAction();
     this.initControls();
+    this.initNavControls();
 
   },
 
@@ -72,6 +73,27 @@ var HUD = {
       }
 
 
+    }
+
+    // --- 3D Navigation Controls (Zoom + Pan) ---
+    if (!$('#' + this.container + ' #nav-controls').length) {
+      $('#' + this.container).append(
+        '<div id="nav-controls">' +
+        '  <div class="nav-zoom">' +
+        '    <a id="nav-zoom-in" class="nav-btn" title="Zoom In"><i class="fa fa-plus"></i></a>' +
+        '    <a id="nav-zoom-out" class="nav-btn" title="Zoom Out"><i class="fa fa-minus"></i></a>' +
+        '  </div>' +
+        '  <div class="nav-pan">' +
+        '    <a id="nav-pan-up" class="nav-btn" title="Pan Up"><i class="fa fa-chevron-up"></i></a>' +
+        '    <div class="nav-pan-row">' +
+        '      <a id="nav-pan-left" class="nav-btn" title="Pan Left"><i class="fa fa-chevron-left"></i></a>' +
+        '      <a id="nav-pan-reset" class="nav-btn" title="Reset View"><i class="fa fa-dot-circle-o"></i></a>' +
+        '      <a id="nav-pan-right" class="nav-btn" title="Pan Right"><i class="fa fa-chevron-right"></i></a>' +
+        '    </div>' +
+        '    <a id="nav-pan-down" class="nav-btn" title="Pan Down"><i class="fa fa-chevron-down"></i></a>' +
+        '  </div>' +
+        '</div>'
+      );
     }
 
     if(!Ed3d.withHudPanel) return;
@@ -1152,6 +1174,90 @@ var HUD = {
 
     $('#hud').addClass('enlarge');
 
+
+  },
+
+  /**
+   * Init on-screen 3D navigation buttons (Zoom In/Out + Pan 4-directions + Reset)
+   */
+  'initNavControls': function () {
+
+    if (!$('#nav-controls').length) return;
+
+    var _navTimer = null;
+
+    function startRepeat(fn) {
+      fn();
+      _navTimer = setInterval(fn, 80);
+    }
+
+    function stopRepeat() {
+      if (_navTimer !== null) {
+        clearInterval(_navTimer);
+        _navTimer = null;
+      }
+    }
+
+    function zoomIn() {
+      var dir = new THREE.Vector3().subVectors(camera.position, controls.target);
+      var dist = dir.length() * 0.9;
+      var minDist = controls.minDistance || 1;
+      if (dist < minDist) dist = minDist;
+      dir.setLength(dist);
+      camera.position.copy(controls.target).add(dir);
+      controls.update();
+    }
+
+    function zoomOut() {
+      var dir = new THREE.Vector3().subVectors(camera.position, controls.target);
+      var dist = dir.length() * 1.1;
+      var maxDist = controls.maxDistance || 60000;
+      if (dist > maxDist) dist = maxDist;
+      dir.setLength(dist);
+      camera.position.copy(controls.target).add(dir);
+      controls.update();
+    }
+
+    function panCamera(dx, dy) {
+      var dist = camera.position.distanceTo(controls.target);
+      var speed = dist * 0.04;
+      var right = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 0);
+      var up    = new THREE.Vector3().setFromMatrixColumn(camera.matrix, 1);
+      var offset = new THREE.Vector3()
+        .addScaledVector(right, dx * speed)
+        .addScaledVector(up,    dy * speed);
+      camera.position.add(offset);
+      controls.target.add(offset);
+      controls.update();
+    }
+
+    function bindNavBtn(id, fn) {
+      $('#' + id).on('mousedown touchstart', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        startRepeat(fn);
+      });
+    }
+
+    $(document).on('mouseup touchend touchcancel', stopRepeat);
+
+    bindNavBtn('nav-zoom-in',   zoomIn);
+    bindNavBtn('nav-zoom-out',  zoomOut);
+    bindNavBtn('nav-pan-up',    function () { panCamera( 0,  1); });
+    bindNavBtn('nav-pan-down',  function () { panCamera( 0, -1); });
+    bindNavBtn('nav-pan-left',  function () { panCamera(-1,  0); });
+    bindNavBtn('nav-pan-right', function () { panCamera( 1,  0); });
+
+    $('#nav-pan-reset').on('mousedown touchstart', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      Action.moveInitalPosition();
+    });
+
+    // Block all pointer events from leaking through to OrbitControls
+    $('#nav-controls').on('mousedown pointerdown touchstart wheel click contextmenu', function (e) {
+      e.stopPropagation();
+    });
 
   },
 
