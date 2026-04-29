@@ -326,8 +326,8 @@ var HUD = {
           '  <p>Upload your journals or other JSON files that contain system names and coordinates and these will be displayed on the map.</p>' +
           '  <label id="file-upload-drop" for="file-upload-input">' +
           '    <i class="fa fa-cloud-upload"></i>' +
-          '    Click or drag &amp; drop JSON files here' +
-          '    <input id="file-upload-input" type="file" accept=".json,application/json" multiple>' +
+          '    Click or drag &amp; drop JSON or CSV files here' +
+          '    <input id="file-upload-input" type="file" accept=".json,application/json,.csv,text/csv" multiple>' +
           '  </label>' +
           '  <div id="file-upload-messages"></div>' +
           '</div>';
@@ -592,7 +592,116 @@ var HUD = {
       // Overridden below to also handle raw JSONL text
       var _handleParsedFile = handleParsedFile;
 
+      // -----------------------------------------------------------------------
+      // CSV support
+      // -----------------------------------------------------------------------
+
+      // Map of normalised header key -> priority (lower = higher priority)
+      var NAME_HEADERS = { 'systemname': 0, 'system': 1, 'name': 2 };
+      var X_HEADERS = { 'coordx': 0, 'x': 1 };
+      var Y_HEADERS = { 'coordy': 0, 'y': 1 };
+      var Z_HEADERS = { 'coordz': 0, 'z': 1 };
+
+      // Normalise a header for matching: lowercase, strip non-alphanumeric
+      function normaliseHeader(h) {
+        return h.toLowerCase().replace(/[^a-z0-9]/g, '');
+      }
+
+      // Pick the best matching column from a row's field list for a given priority map
+      function pickColumn(fields, priorityMap) {
+        var best = null;
+        var bestPriority = Infinity;
+        fields.forEach(function (f) {
+          var key = normaliseHeader(f);
+          if (priorityMap.hasOwnProperty(key) && priorityMap[key] < bestPriority) {
+            best = f;
+            bestPriority = priorityMap[key];
+          }
+        });
+        return best;
+      }
+
+      function displayCsvSystems(filename, systems, done) {
+        if (!System.particleGeo) System.initParticleSystem();
+        var $status = $('<div class="fu-msg info"></div>').text('Adding systems\u2026');
+        $messages.append($status);
+        $messages.scrollTop($messages[0].scrollHeight);
+
+        var i = 0;
+        function addNext() {
+          if (i < systems.length) {
+            var s = systems[i++];
+            System.create({ name: s.system, coords: { x: s.x, y: s.y, z: s.z } });
+            $status.text('[' + i + '/' + systems.length + '] ' + s.system);
+            $messages.scrollTop($messages[0].scrollHeight);
+            setTimeout(addNext, 0);
+          } else {
+            System.endParticleSystem();
+            $status.removeClass('info').addClass('success')
+              .text(filename + ': Loaded \u2014 ' + systems.length + ' system(s) from CSV.');
+            $messages.scrollTop($messages[0].scrollHeight);
+            done();
+          }
+        }
+        addNext();
+      }
+
+      function parseCsvText(filename, text, done) {
+        if (typeof Papa === 'undefined') {
+          addMessage(filename + ': CSV parser (PapaParse) not available.', 'error');
+          done(); return;
+        }
+        var result = Papa.parse(text, { header: true, skipEmptyLines: true, dynamicTyping: false });
+
+        if (!result.data || result.data.length === 0) {
+          addMessage(filename + ': CSV file is empty or has no data rows.', 'error');
+          done(); return;
+        }
+
+        var fields = result.meta.fields || [];
+        var nameCol = pickColumn(fields, NAME_HEADERS);
+        var xCol = pickColumn(fields, X_HEADERS);
+        var yCol = pickColumn(fields, Y_HEADERS);
+        var zCol = pickColumn(fields, Z_HEADERS);
+
+        if (!nameCol) {
+          addMessage(filename + ': CSV has no recognised system name column. Expected Name, System, or SystemName.', 'error');
+          done(); return;
+        }
+        if (!xCol || !yCol || !zCol) {
+          var missing = [!xCol && 'X', !yCol && 'Y', !zCol && 'Z'].filter(Boolean).join(', ');
+          addMessage(filename + ': CSV is missing coordinate column(s): ' + missing + '. Expected X/Y/Z or CoordX/CoordY/CoordZ.', 'error');
+          done(); return;
+        }
+
+        var systems = [];
+        result.data.forEach(function (row) {
+          var sysName = row[nameCol] ? String(row[nameCol]).trim() : '';
+          var x = parseFloat(row[xCol]);
+          var y = parseFloat(row[yCol]);
+          var z = parseFloat(row[zCol]);
+          if (sysName && !isNaN(x) && !isNaN(y) && !isNaN(z)) {
+            systems.push({ system: sysName, x: x, y: y, z: z });
+          }
+        });
+
+        if (systems.length === 0) {
+          addMessage(filename + ': No valid rows found in CSV (check that Name and X/Y/Z columns have values).', 'error');
+          done(); return;
+        }
+
+        addMessage(filename + ': Parsed ' + systems.length + ' system(s) from CSV.', 'info');
+        displayCsvSystems(filename, systems, done);
+      }
+
+      // -----------------------------------------------------------------------
+
       function processRawText(filename, text, done) {
+        // Handle CSV files by extension
+        if (/\.csv$/i.test(filename)) {
+          parseCsvText(filename, text, done);
+          return;
+        }
         // Try JSONL first
         var events = parseJsonl(text);
         if (isJournalJsonl(events)) {
