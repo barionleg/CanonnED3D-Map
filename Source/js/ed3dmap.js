@@ -39,6 +39,29 @@ var container;
 var routes = [];
 var lensFlareSel;
 
+//-- WASD Fly Camera state
+var flyCam = {
+  keys: {},
+  speed: 10,
+  minSpeed: 1,
+  maxSpeed: 500
+};
+
+document.addEventListener('keydown', function (e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  flyCam.keys[e.code] = true;
+  if (e.code === 'Equal' || e.code === 'NumpadAdd') {
+    flyCam.speed = Math.min(flyCam.maxSpeed, +(flyCam.speed * 1.5).toFixed(1));
+  }
+  if (e.code === 'Minus' || e.code === 'NumpadSubtract') {
+    flyCam.speed = Math.max(flyCam.minSpeed, +(flyCam.speed / 1.5).toFixed(1));
+  }
+});
+
+document.addEventListener('keyup', function (e) {
+  flyCam.keys[e.code] = false;
+});
+
 
 var Ed3d = {
 
@@ -778,6 +801,80 @@ function animate(time) {
   //controls.noPan().set(false);
   //controls.minPolarAngle = 0;
   //controls.maxPolarAngle = 0;
+
+  // -- WASD fly camera movement
+  if (!Ed3d.isTopView) {
+    (function () {
+      var k = flyCam.keys;
+      var anyKey = k['KeyW'] || k['KeyS'] || k['KeyA'] || k['KeyD'] ||
+                   k['KeyQ'] || k['KeyE'] || k['KeyR'] || k['KeyF'] ||
+                   k['ArrowUp'] || k['ArrowDown'] ||
+                   k['PageUp'] || k['PageDown'];
+      if (!anyKey) return;
+
+      var speed = flyCam.speed;
+      var camPos = camera.position.clone();
+      var target = controls.target.clone();
+
+      // horizontal forward direction (camera to target, flattened to xz plane)
+      var forward = new THREE.Vector3().subVectors(target, camPos);
+      forward.y = 0;
+      if (forward.lengthSq() < 0.0001) forward.set(0, 0, -1);
+      forward.normalize();
+
+      // right = forward x world-up
+      var right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+
+      // W/S: move forward / backward; A/D: strafe
+      var move = new THREE.Vector3();
+      if (k['KeyW']) move.addScaledVector(forward,  speed);
+      if (k['KeyS']) move.addScaledVector(forward, -speed);
+      if (k['KeyA']) move.addScaledVector(right,   -speed);
+      if (k['KeyD']) move.addScaledVector(right,    speed);
+      if (move.lengthSq() > 0) {
+        camera.position.add(move);
+        controls.target.add(move);
+      }
+
+      // Q/E: yaw camera in place — rotate target around camera position
+      if (k['KeyQ'] || k['KeyE']) {
+        var yawDist = new THREE.Vector3(camera.position.x - controls.target.x, 0, camera.position.z - controls.target.z).length();
+        var angle = (k['KeyQ'] ? -1 : 1) * speed / Math.max(yawDist, 1);
+        var tx = controls.target.x - camera.position.x;
+        var tz = controls.target.z - camera.position.z;
+        var cosA = Math.cos(angle), sinA = Math.sin(angle);
+        controls.target.x = camera.position.x + cosA * tx - sinA * tz;
+        controls.target.z = camera.position.z + sinA * tx + cosA * tz;
+      }
+
+      // R/F: move up / down
+      if (k['KeyR']) { camera.position.y += speed; controls.target.y += speed; }
+      if (k['KeyF']) { camera.position.y -= speed; controls.target.y -= speed; }
+
+      // ArrowUp/ArrowDown: dolly in / dolly out
+      if (k['ArrowUp'] || k['ArrowDown']) {
+        var toCam = camera.position.clone().sub(controls.target);
+        var dist = toCam.length();
+        if (k['ArrowDown']) dist = Math.min(controls.maxDistance, dist + speed);
+        if (k['ArrowUp'])   dist = Math.max(10, dist - speed);
+        camera.position.copy(controls.target.clone().addScaledVector(toCam.normalize(), dist));
+      }
+
+      // PageUp/PageDown: pitch in place — rotate target around camera position
+      if (k['PageUp'] || k['PageDown']) {
+        var toTarget = controls.target.clone().sub(camera.position);
+        var pitchDist = toTarget.length();
+        var pitchAngle = (k['PageUp'] ? -1 : 1) * speed / Math.max(pitchDist, 1);
+        toTarget.applyAxisAngle(right, pitchAngle);
+        // Clamp so target never flips past vertical
+        var minPolar = 0.05, maxPolar = Math.PI - 0.05;
+        var polar = Math.acos(Math.max(-1, Math.min(1, toTarget.clone().normalize().y)));
+        if (polar >= minPolar && polar <= maxPolar) {
+          controls.target.copy(camera.position.clone().add(toTarget));
+        }
+      }
+    })();
+  }
 
   controls.update();
 
